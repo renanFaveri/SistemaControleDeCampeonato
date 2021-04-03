@@ -21,6 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="MVC\entidade\brando.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\defensiva.py">
       <SubType>Code</SubType>
     </Compile>
@@ -42,6 +45,12 @@
     <Compile Include="MVC\entidade\moderada.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\entidade\moderado.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\rigidez.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\ofensiva.py">
       <SubType>Code</SubType>
     </Compile>
@@ -49,6 +58,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\controle\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\severo.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\__init__.py">
