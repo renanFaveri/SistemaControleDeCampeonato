@@ -1,4 +1,4 @@
-from entidade.posicao import Posicao
+from .posicao import Posicao
 
 class Atacante(Posicao):
 
