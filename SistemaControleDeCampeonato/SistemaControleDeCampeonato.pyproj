@@ -54,6 +54,15 @@
     <Compile Include="MVC\entidade\arbitro.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\entidade\campeonato.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\calendario.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\partida.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\tecnico.py">
       <SubType>Code</SubType>
     </Compile>
@@ -73,6 +82,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\severo.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\time.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\__init__.py">
