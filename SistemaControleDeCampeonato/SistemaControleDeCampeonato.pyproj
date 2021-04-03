@@ -21,6 +21,18 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="MVC\entidade\goleiro.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\defensor.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\meioCampo.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\atacante.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\posicao.py">
       <SubType>Code</SubType>
     </Compile>
