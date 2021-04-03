@@ -48,6 +48,18 @@
     <Compile Include="MVC\entidade\moderado.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\entidade\jogador.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\arbitro.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\tecnico.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\pessoa.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\rigidez.py">
       <SubType>Code</SubType>
     </Compile>
