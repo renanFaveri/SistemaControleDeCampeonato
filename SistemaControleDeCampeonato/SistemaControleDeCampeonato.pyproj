@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>175030b8-ee52-4d14-9ab8-3f96b3e324e3</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>SistemaControleDeCampeonato.py</StartupFile>
+    <StartupFile>MVC\SistemaControleDeCampeonato.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,7 +21,28 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="SistemaControleDeCampeonato.py" />
+    <Compile Include="MVC\entidade\posicao.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\controle\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\limite\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\SistemaControleDeCampeonato.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MVC\" />
+    <Folder Include="MVC\controle\" />
+    <Folder Include="MVC\entidade\" />
+    <Folder Include="MVC\limite\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
