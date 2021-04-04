@@ -1,4 +1,5 @@
 from .tecnico import Tecnico
+from .jogador import Jogador
 
 class Time:
     
@@ -7,6 +8,7 @@ class Time:
         self.__nome = nome
         self.__classificacao = None
         self.__jogadores = []
+        self.__n_jogadores = 15
         self.__tecnico = None
         self.__vitorias = 0
         self.__empates = 0
@@ -39,6 +41,10 @@ class Time:
     @property
     def jogadores(self):
         return self.__jogadores
+
+    @property
+    def n_jogadores(self):
+        return self.__n_jogadores
     
     @property
     def tecnico(self):
@@ -93,3 +99,31 @@ class Time:
     def gols_sofridos(self, gols_sofridos):
         if isinstance(gols_sofridos, int):
             self.__gols_sofridos = gols_sofridos
+
+    def adicionar_jogadores(self, jogadores: list):
+        if isinstance(jogadores, list):
+            for jogador in jogadores:
+                if not isinstance(jogador, Jogador):
+                    raise TypeError
+            if (len(jogadores) + len(self.jogadores)) > self.n_jogadores:
+                raise ValueError
+            else:
+                self.jogadores.extend(jogadores)
+        else:
+            raise ListaError
+                    
+    def remover_jogadores(self, jogadores: list):
+        if isinstance(jogadores, list):
+            for jogador in jogadores:
+                if not isinstance(jogador, Jogador):
+                    raise TypeError
+                elif jogador not in self.jogadores:
+                    raise ValueError
+                else:
+                    self.jogadores.remove(jogador)
+        else:
+            raise ListaError
+    
+    def __str__(self):
+        return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
+    
