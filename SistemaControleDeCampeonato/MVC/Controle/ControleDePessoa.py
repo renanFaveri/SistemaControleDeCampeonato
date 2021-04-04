@@ -16,6 +16,9 @@ from MVC.entidade.severo import Severo
 from MVC.entidade.arbitro import Arbitro
 from MVC.entidade.tecnico import Tecnico
 from MVC.entidade.jogador import Jogador
+from MVC.limite.tela import Tela
+from MVC.limite.telaDePessoa import TelaDePessoas
+from MVC.exceptionLista import ListaError
 
 
 class ControladorDePessoas(ControladorDeEntidade):
