@@ -1,8 +1,5 @@
 from .controleDeEntidade import ControladorDeEntidade
-from MVC.entidade.pessoa import Pessoa  
-from MVC.entidade.jogador import Jogador
-from MVC.entidade.tecnico import Tecnico
-from MVC.entidade.arbitro import Arbitro
+from MVC.entidade.pessoa import Pessoa
 from MVC.entidade.posicao import Posicao
 from MVC.entidade.goleiro import Goleiro
 from MVC.entidade.defensor import Defensor
@@ -16,10 +13,15 @@ from MVC.entidade.rigidez import Rigidez
 from MVC.entidade.brando import Brando
 from MVC.entidade.moderado import Moderado
 from MVC.entidade.severo import Severo
+from MVC.entidade.arbitro import Arbitro
+from MVC.entidade.tecnico import Tecnico
+from MVC.entidade.jogador import Jogador
+
 
 class ControladorDePessoas(ControladorDeEntidade):
     
-    def __init__(self):
+    def __init__(self, controlador_master):
+        self.__controlador_master = controlador_master
         self.__jogadores_registrados = []
         self.__tecnicos_registrados = []
         self.__arbitros_registrados = []
@@ -36,7 +38,18 @@ class ControladorDePessoas(ControladorDeEntidade):
     def tela(self, tela):
         if isinstance(tela, Tela):
             self.__tela = tela
-                                    
+            
+    @property
+    def tecnicos_registrados(self):
+        return self.__tecnicos_registrados
+    
+    @property
+    def jogadores_registrados(self):
+        return self.__jogadores_registrados
+    
+    @property
+    def arbitros_registrados(self):
+        return self.__arbitros_registrados
 
     
     def cadastrar_jogador(self):
@@ -53,7 +66,7 @@ class ControladorDePessoas(ControladorDeEntidade):
             else:
                 contador += 1
         self.__jogadores_registrados.append(jogador)
-        self.mostrar_informacoes(jogador)      
+        self.mostrar_informacoes(jogador)
         
     def cadastrar_arbitro(self):
         nome = self.tela.recebe_str('Digite o nome do ábitro: ', 3)
@@ -103,14 +116,14 @@ class ControladorDePessoas(ControladorDeEntidade):
                 cadastrando = False
         
     def buscar_nome(self, lista):
-        nome = self.tela.recebe_str('Procurar nome: ')
+        nome = self.tela.recebe_str('Procurar por nome: ')
         for obj in lista:
             if obj.nome.lower() == nome.lower():
                 self.mostrar_informacoes(obj)
                 return obj
     
     def buscar_id(self, lista):
-        id_ = self.tela.recebe_int('Procurar ID: ')
+        id_ = self.tela.recebe_int('Procurar por ID: ')
         contador = 0
         while contador < len(lista):
             if id_ == lista[contador].id_:
@@ -172,10 +185,27 @@ class ControladorDePessoas(ControladorDeEntidade):
             return self.buscar_id(self.__arbitros_registrados)
         elif metodo == 3:
             return self.buscar_rigidez()    
-                
-    def buscar_pessoa(self):
-        procurando = True
-        while procurando:
+        
+    def buscar(self, lista):
+        if isinstance(lista, list):            
+            buscando = True
+            opcoes = {1: self.buscar_nome, 2: self.buscar_id}
+            while buscando:
+                menu = ['1 - Buscar por nome', '2 - Buscar por ID', '0 - Voltar ao menu inicial']
+                opcao = self.tela.exibir_menu(menu, range(3))
+                if opcao == 0:
+                    buscando = False
+                    return
+                else:
+                    opcoes[opcao]()
+                buscando = self.tela.recebe_int('Procurar outro time? [1 - Sim / 0 - Não]: ', [0,1])
+        else:
+            raise ListaError
+        
+             
+    def buscar_pessoas(self):
+        buscando = True
+        while buscando:
             menu = ['1 - Bucar jogador', '2 - Buscar técnico', '3 - Buscar árbitro', '0 - Voltar ao menu inicial']
             opcao = self.tela.exibir_menu(menu, range(4))
             if opcao == 1:
@@ -191,9 +221,9 @@ class ControladorDePessoas(ControladorDeEntidade):
                 opcao = self.tela.exibir_menu(menu, range(1,4))
                 self.buscar_arbitro(opcao)
             elif opcao == 0:
-                procurando = False
+                buscando = False
                 return
-            procurando = self.tela.recebe_int('Procurar outra pessoa? [1 - Sim / 0 - Não]: ', [0,1])
+            buscando = self.tela.recebe_int('Procurar outra pessoa? [1 - Sim / 0 - Não]: ', [0,1])
             
         
     def alterar_jogador(self):
@@ -358,32 +388,67 @@ class ControladorDePessoas(ControladorDeEntidade):
         menu = ['1 - Alterar jogador', '2 - Alterar técnico', '3 - Alterar árbitro', '0 - Voltar ao menu inicial']
         opcao = self.tela.exibir_menu(menu, range(4))
         opcoes[opcao]()
-        
-        #try:
-        #    opcoes[opcao]()
-        #except ValueError:
-        #      self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
 
-    def listar_jogadores(self):
-        for jogador in self.__jogadores_registrados:
-            self.mostrar_informacoes(jogador)
-        return self.__jogadores_registrados
     
-    def listar_tecnicos(self):
-        for tecnico in self.__tecnicos_registrados:
-            self.mostrar_informacoes(tecnico)
-        return self.__tecnicos_registrados
+    def listar_jogadores(self, n_entradas = None):
+        jogadores = []
+        lista = self.__jogadores_registrados
+        if n_entradas is None:
+            menu = ['1 - Buscar todos os jogadores cadastrados', '2 - Buscar jogadores individualmente']
+            opcao = self.tela.exibir_menu(menu, range(1,3))
+            if opcao == 1:
+                n_entradas = len(lista)
+            elif opcao == 2:
+                n_entradas = self.tela.recebe_int('Informe o número de jogadores a serem listados: ')
+        for i in range(n_entradas):
+            jogador = self.buscar(lista)
+            jogadores.append(jogador)
+        return jogadores
     
-    def listar_arbitros(self):
-        for arbitro in self.__arbitros_registrados:
-            self.mostrar_informacoes(arbitro)
-        return self.__arbitros_registrados    
+    
+    def listar_tecnicos(self, n_entradas = None):
+        tecnicos = []
+        lista = self.__tecnicos_registrados
+        if n_entradas is None:
+            menu = ['1 - Buscar todos os técnicos cadastrados', '2 - Buscar técnicos individualmente']
+            opcao = self.tela.exibir_menu(menu, range(1,3))
+            if opcao == 1:
+                n_entradas = len(lista)
+            elif opcao == 2:
+                n_entradas = self.tela.recebe_int('Informe o número de técnicos a serem listados: ')
+        for i in range(n_entradas):
+            tecnico = self.buscar(lista)
+            tecnicos.append(tecnico)
+        return tecnicos
+    
         
-    def listar(self):
+    def listar_arbitros(self, n_entradas = None):
+        arbitros = []
+        lista = self.__arbitros_registrados
+        if n_entradas is None:
+            menu = ['1 - Buscar todos os árbitros cadastrados', '2 - Buscar árbitros individualmente']
+            opcao = self.tela.exibir_menu(menu, range(1,3))
+            if opcao == 1:
+                n_entradas = len(lista)
+            elif opcao == 2:
+                n_entradas = self.tela.recebe_int('Informe o número de árbitros a serem listados: ')
+        for i in range(n_entradas):
+            arbitro = self.buscar(lista)
+            arbitros.append(arbitro)
+        return arbitros
+    
+        
+    def listar(self, opcao = None):
         opcoes = {0: self.abre_tela, 1: self.listar_jogadores, 2: self.listar_tecnicos, 3: self.listar_arbitros}
-        menu = ['1 - Listar jogadores', '2 - Listar técnicos','3 - Listar Árbitros', '0 - Voltar ao menu inicial']
-        opcao = self.tela.exibir_menu(menu, range(4))
-        opcoes[opcao]()
+        if opcao is None:
+            menu = ['1 - Listar jogadores', '2 - Listar técnicos','3 - Listar Árbitros', '0 - Voltar ao menu inicial']
+            opcao = self.tela.exibir_menu(menu, range(4))
+            opcoes[opcao]()
+        elif isinstance(opcao, int) and opcao in range(4):
+            opcoes[opcao]()
+        else:
+            raise ValueError
+
         
     def excluir_jogador(self):
         opcoes = {1: self.buscar_nome, 2: self.buscar_id}
@@ -424,18 +489,23 @@ class ControladorDePessoas(ControladorDeEntidade):
         opcao = self.tela.exibir_menu(menu, range(4))
         opcoes[opcao]()
         
-    def mostrar_informacoes(self, pessoa = None):
+    def mostrar_informacoes(self, pessoa):
             self.tela.mostrar_mensagem('')
             self.tela.mostrar_mensagem('Resultado:')
             self.tela.mostrar_mensagem(pessoa)
     
     def abre_tela(self):
         while True:
-            opcoes = {1: self.cadastrar, 2: self.buscar_pessoa, 3: self.alterar, 4: self.listar,
-                      5: self.excluir, 6: self.mostrar_informacoes}
-            menu = ['1 - Cadastrar', '2 - Buscar', '3 - Alterar','4 - Listar','5 - Excluir', '0 - Sair']
-            opcao = self.tela.exibir_menu(menu, range(6))
-            if opcao != 0:
-                opcoes[opcao]()
-            else:
-                return
+            try:
+                opcoes = {1: self.cadastrar, 2: self.buscar_pessoas, 3: self.alterar, 4: self.listar,
+                          5: self.excluir}
+                menu = ['1 - Cadastrar', '2 - Buscar', '3 - Alterar', '4 - Listar', '5 - Excluir', '0 - Sair']
+                opcao = self.tela.exibir_menu(menu, range(6))
+                if opcao != 0:
+                    opcoes[opcao]()
+                else:
+                    return
+            except Exception:
+                self.tela.mostrar_mensagem('Entrada inválida.')
+
+    
