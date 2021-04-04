@@ -1,5 +1,6 @@
 from .tecnico import Tecnico
 from .jogador import Jogador
+from MVC.exceptionLista import ListaError
 
 class Time:
     

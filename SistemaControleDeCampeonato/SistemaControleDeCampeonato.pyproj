@@ -24,7 +24,16 @@
     <Compile Include="MVC\Controle\controleDeEntidade.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MVC\Controle\ControleDePessoa.py">
+    <Compile Include="MVC\controle\ControleDePessoa.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\controle\controleDeSistema.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\controle\controleDeTime.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\controle\controleDeCampeonato.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\brando.py">
@@ -96,7 +105,28 @@
     <Compile Include="MVC\entidade\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\exceptionCaracter.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\limite\tela.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\limite\telaDeCampeonato.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\limite\telaDePessoa.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\limite\telaDeTime.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\limite\telaInicial.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\limite\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\exceptionLista.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\__init__.py">
