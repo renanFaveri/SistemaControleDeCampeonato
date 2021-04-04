@@ -21,6 +21,18 @@ class ControladorDeEntidade(ABC):
         pass
     
     @abstractmethod
+    def buscar_nome(self):
+        pass
+    
+    @abstractmethod
+    def buscar_id(self):
+        pass    
+    
+    @abstractmethod
+    def buscar(self):
+        pass
+    
+    @abstractmethod
     def alterar(self):
         pass
     
@@ -39,4 +51,3 @@ class ControladorDeEntidade(ABC):
     @abstractmethod
     def abre_tela(self):
         pass
-    

@@ -21,6 +21,12 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="MVC\Controle\controleDeEntidade.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\Controle\ControleDePessoa.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\brando.py">
       <SubType>Code</SubType>
     </Compile>
