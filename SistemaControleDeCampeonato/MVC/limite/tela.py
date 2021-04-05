@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from MVC.exceptionCaracter import CaracterEspecialError
 
 
 class Tela(ABC):
@@ -50,7 +51,7 @@ class Tela(ABC):
                         raise CaracterEspecialError
                 if tamanho_valido and len(resposta) < tamanho_valido:
                         raise ValueError
-                print(resposta)
+                print('Entrada:', resposta)
                 return resposta
             except ValueError:
                 print(f'»»»» O nome completo deve ter ao menos {tamanho_valido} caracteres!\n')
@@ -59,4 +60,4 @@ class Tela(ABC):
                 
     def mostrar_mensagem(self, mensagem):
         print(mensagem)
-    
+

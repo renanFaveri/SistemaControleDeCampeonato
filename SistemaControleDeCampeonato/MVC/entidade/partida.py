@@ -23,6 +23,9 @@ class Partida:
     def time_anfitriao(self, time_anfitriao):
         if isinstance(time_anfitriao, Time):
             self.__time_anfitriao = time_anfitriao
+            return True
+        else:
+            raise TypeError
     
     @property
     def time_visitante(self):
@@ -32,6 +35,9 @@ class Partida:
     def time_visitante(self, time_visitante):
         if isinstance(time_visitante, Time):
             self.__time_visitante = time_visitante
+            return True
+        else:
+            raise TypeError
             
     @property
     def arbitro_designado(self):
@@ -41,6 +47,9 @@ class Partida:
     def arbitro_designado(self, arbitro_designado):
         if isinstance(arbitro_designado, Arbitro):
             self.__arbitro_designado = arbitro
+            return True
+        else:
+            raise TypeError
             
     @property
     def data_do_jogo(self):
@@ -57,4 +66,3 @@ class Partida:
     
     def criar_relatorio(self):
         pass
-    

@@ -1,5 +1,6 @@
 from .time import Time
 from .calendario import Calendario
+from MVC.exceptionLista import ListaError
 
 
 class Campeonato:
@@ -60,6 +61,7 @@ class Campeonato:
                 raise ValueError
             else:
                 self.times.extend(times)
+                return True
         else:
             raise ListaError
                     
@@ -72,6 +74,7 @@ class Campeonato:
                     raise ValueError
                 else:
                     self.times.remove(time)
+                    return True
         else:
             raise ListaError
     

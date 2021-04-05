@@ -21,8 +21,9 @@ from MVC.limite.telaDePessoa import TelaDePessoas
 from MVC.exceptionLista import ListaError
 
 
+
 class ControladorDePessoas(ControladorDeEntidade):
-    
+
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
         self.__jogadores_registrados = []
@@ -30,7 +31,7 @@ class ControladorDePessoas(ControladorDeEntidade):
         self.__arbitros_registrados = []
         self.__tela = TelaDePessoas(self)
         self.__posicoes = {1: Goleiro(), 2: Defensor(), 3: MeioCampista(), 4: Atacante()}
-        self.__mentalidades = {1: Defensiva(), 2: Moderada(), 3: Ofensiva}
+        self.__mentalidades = {1: Defensiva(), 2: Moderada(), 3: Ofensiva()}
         self.__rigidez = {1: Brando(), 2: Moderado(), 3: Severo()}
 
     @property
@@ -54,54 +55,66 @@ class ControladorDePessoas(ControladorDeEntidade):
     def arbitros_registrados(self):
         return self.__arbitros_registrados
 
-    
     def cadastrar_jogador(self):
         nome_jogador = self.tela.recebe_str('Informe o nome do jogador: ', 3)
         menu = ['1 - Goleiro', '2 - Defensor','3 - Meio campista', '4 - Atacante']
         opcao = self.tela.exibir_menu(menu, range(1,5))
         posicao = self.__posicoes[opcao]
-        jogador = Jogador(nome_jogador, posicao)
-        contador = 0
-        while contador < len(self.__jogadores_registrados):
-            if jogador.nome ==  self.__jogadores_registrados[contador].nome and\
-                            jogador.posicao == self.__jogadores_registrados[contador].posicao:
-                    raise ValueError
-            else:
-                contador += 1
-        self.__jogadores_registrados.append(jogador)
-        self.mostrar_informacoes(jogador)
+        try:
+            jogador = Jogador(nome_jogador, posicao)
+            contador = 0
+            while contador < len(self.__jogadores_registrados):
+                if jogador.nome ==  self.__jogadores_registrados[contador].nome and\
+                                jogador.posicao == self.__jogadores_registrados[contador].posicao:
+                        raise ValueError
+                else:
+                    contador += 1
+            self.__jogadores_registrados.append(jogador)
+            self.mostrar_informacoes(jogador)
+        except TypeError:
+            self.tela.mostrar_mensagem('»»»» Não foi informada a posição do jogador.')
+
         
-    def cadastrar_arbitro(self):
-        nome = self.tela.recebe_str('Digite o nome do ábitro: ', 3)
-        menu = ['1 - Brando', '2 - Moderado','3 - Severo']
-        opcao = self.tela.exibir_menu(menu, range(1,4))
-        rigidez = self.__rigidez[opcao]
-        arbitro = Arbitro(nome, rigidez)
-        contador = 0
-        while contador < len(self.__arbitros_registrados):
-            if arbitro.nome ==  self.__arbitros_registrados[contador].nome and\
-                        arbitro.rigidez == self.__arbitros_registrados[contador].rigidez:
-                raise ValueError
-            else:
-                contador += 1
-        self.__arbitros_registrados.append(arbitro)
-        self.mostrar_informacoes(arbitro)
         
     def cadastrar_tecnico(self):
-        nome = self.tela.recebe_str('Digite o nome do técnico: ', 3)
+        nome_tecnico = self.tela.recebe_str('Digite o nome do técnico: ', 3)
         menu = ['1 - Defensiva', '2 - Moderada','3 - Ofensiva']
         opcao = self.tela.exibir_menu(menu, range(1,4))
         mentalidade = self.__mentalidades[opcao]
-        tecnico = Tecnico(nome, mentalidade)
-        contador = 0
-        while contador < len(self.__tecnicos_registrados):
-            if tecnico.nome ==  self.__tecnicos_registrados[contador].nome and\
-                        tecnico.mentalidade == self.__tecnicos_registrados[contador].mentalidade:
-                raise ValueError
-            else:
-                contador += 1
-        self.__tecnicos_registrados.append(tecnico)
-        self.mostrar_informacoes(tecnico)
+        try:
+            tecnico = Tecnico(nome_tecnico, mentalidade)
+            contador = 0
+            while contador < len(self.__tecnicos_registrados):
+                if tecnico.nome ==  self.__tecnicos_registrados[contador].nome and\
+                            tecnico.mentalidade == self.__tecnicos_registrados[contador].mentalidade:
+                    raise ValueError
+                else:
+                    contador += 1
+            self.__tecnicos_registrados.append(tecnico)
+            self.mostrar_informacoes(tecnico)
+        except TypeError:
+            self.tela.mostrar_mensagem('»»»» Não foi informada a mentalidade do técnico.')
+        
+        
+    def cadastrar_arbitro(self):
+        nome_arbitro = self.tela.recebe_str('Digite o nome do ábitro: ', 3)
+        menu = ['1 - Brando', '2 - Moderado','3 - Severo']
+        opcao = self.tela.exibir_menu(menu, range(1,4))
+        rigidez = self.__rigidez[opcao]
+        try:
+            arbitro = Arbitro(nome_arbitro, rigidez)
+            contador = 0
+            while contador < len(self.__arbitros_registrados):
+                if arbitro.nome ==  self.__arbitros_registrados[contador].nome and\
+                            arbitro.rigidez == self.__arbitros_registrados[contador].rigidez:
+                    raise ValueError
+                else:
+                    contador += 1
+            self.__arbitros_registrados.append(arbitro)
+            self.mostrar_informacoes(arbitro)
+        except TypeError:
+            self.tela.mostrar_mensagem('»»»» Não foi informada a rigidez do árbitro.')     
+    
                 
     def cadastrar(self):
         cadastrando = True
@@ -114,7 +127,7 @@ class ControladorDePessoas(ControladorDeEntidade):
                     opcoes[opcao]()
                 except ValueError:
                     self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
-                cadastrando = self.tela.recebe_int('Cadastrar outra pessoa? [1 - Sim / 0 - Não]: ', [0,1])
+                cadastrando = self.tela.recebe_int('Realizar nova operação? [1 - Sim / 0 - Não]: ', [0,1])
             else:
                 cadastrando = False
         
@@ -198,13 +211,16 @@ class ControladorDePessoas(ControladorDeEntidade):
                 opcao = self.tela.exibir_menu(menu, range(3))
                 if opcao == 0:
                     buscando = False
-                    return
                 else:
-                    opcoes[opcao]()
-                buscando = self.tela.recebe_int('Procurar outro time? [1 - Sim / 0 - Não]: ', [0,1])
+                    resultado = opcoes[opcao](lista)
+                    if resultado is None:
+                        self.tela.mostrar_mensagem('Não há pessoa cadastrada com esses dados.')
+                        buscando = self.tela.recebe_int('Procurar outra pessoa? [1 - Sim / 0 - Não]: ', [0,1])
+                    else:
+                        return resultado
         else:
             raise ListaError
-        
+                
              
     def buscar_pessoas(self):
         buscando = True
@@ -280,7 +296,7 @@ class ControladorDePessoas(ControladorDeEntidade):
                     else:
                         alterando = False
                         return
-                    alterando = self.tela.recebe_int('Realizar outra alteração? [1 - Sim / 0 - Não]: ', [0,1])
+                    alterando = self.tela.recebe_int('Realizar outra operação? [1 - Sim / 0 - Não]: ', [0,1])
                 except ValueError:
                     self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
     
@@ -331,7 +347,7 @@ class ControladorDePessoas(ControladorDeEntidade):
                     else:
                             alterando = False
                             return
-                    alterando = self.tela.recebe_int('Realizar outra alteração? [1 - Sim / 0 - Não]: ', [0,1])
+                    alterando = self.tela.recebe_int('Realizar outra operação? [1 - Sim / 0 - Não]: ', [0,1])
                 except ValueError:
                     self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
     
@@ -381,7 +397,7 @@ class ControladorDePessoas(ControladorDeEntidade):
                     else:
                             alterando = False
                             return
-                    alterando = self.tela.recebe_int('Realizar outra alteração? [1 - Sim / 0 - Não]: ', [0,1])
+                    alterando = self.tela.recebe_int('Realizar outra operação? [1 - Sim / 0 - Não]: ', [0,1])
                 except ValueError:
                     self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
                         
@@ -458,33 +474,36 @@ class ControladorDePessoas(ControladorDeEntidade):
         menu = ['1 - Excluir por nome', '2 - Excluir por ID']
         opcao = self.tela.exibir_menu(menu, range(1,3))
         jogador = self.buscar_jogador(opcao)
-        self.__jogadores_registrados.remove(jogador)
-        if jogador not in self.__jogadores_registrados:
-            self.tela.mostrar_mensagem('Jogador excluído com sucesso.')
-        else:
-            self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
+        if jogador:
+            self.__jogadores_registrados.remove(jogador)
+            if jogador not in self.__jogadores_registrados:
+                self.tela.mostrar_mensagem('Jogador excluído com sucesso.')
+            else:
+                self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
             
     def excluir_tecnico(self):
         opcoes = {1: self.buscar_nome, 2: self.buscar_id}
         menu = ['1 - Excluir por nome', '2 - Excluir por ID']
         opcao = self.tela.exibir_menu(menu, range(1,3))
         tecnico = self.buscar_tecnico(opcao)
-        self.__tecnicos_registrados.remove(tecnico)
-        if tecnico not in self.__tecnicos_registrados:
-            self.tela.mostrar_mensagem('Técnico excluído com sucesso.')
-        else:
-            self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
+        if tecnico:
+            self.__tecnicos_registrados.remove(tecnico)
+            if tecnico not in self.__tecnicos_registrados:
+                self.tela.mostrar_mensagem('Técnico excluído com sucesso.')
+            else:
+                self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
         
     def excluir_arbitro(self):
         opcoes = {1: self.buscar_nome, 2: self.buscar_id}
         menu = ['1 - Excluir por nome', '2 - Excluir por ID']
         opcao = self.tela.exibir_menu(menu, range(3))
         arbitro = self.buscar_arbitro(opcao)
-        self.__arbitros_registrados.remove(arbitro)
-        if arbitro not in self.__arbitros_registrados:
-            self.tela.mostrar_mensagem('Árbitro excluído com sucesso.')
-        else:
-            self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')           
+        if arbitro:
+            self.__arbitros_registrados.remove(arbitro)
+            if arbitro not in self.__arbitros_registrados:
+                self.tela.mostrar_mensagem('Árbitro excluído com sucesso.')
+            else:
+                self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')           
         
     def excluir(self):
         opcoes = {0: self.abre_tela, 1: self.excluir_jogador, 2: self.excluir_tecnico, 3: self.excluir_arbitro}
@@ -494,21 +513,17 @@ class ControladorDePessoas(ControladorDeEntidade):
         
     def mostrar_informacoes(self, pessoa):
             self.tela.mostrar_mensagem('')
-            self.tela.mostrar_mensagem('Resultado:')
+            self.tela.mostrar_mensagem('>: ')
             self.tela.mostrar_mensagem(pessoa)
     
     def abre_tela(self):
-        while True:
-            try:
-                opcoes = {1: self.cadastrar, 2: self.buscar_pessoas, 3: self.alterar, 4: self.listar,
-                          5: self.excluir}
-                menu = ['1 - Cadastrar', '2 - Buscar', '3 - Alterar', '4 - Listar', '5 - Excluir', '0 - Sair']
-                opcao = self.tela.exibir_menu(menu, range(6))
-                if opcao != 0:
-                    opcoes[opcao]()
-                else:
-                    return
-            except Exception:
-                self.tela.mostrar_mensagem('Entrada inválida.')
-
-    
+        tela = True
+        while tela:
+            opcoes = {1: self.cadastrar, 2: self.buscar_pessoas, 3: self.alterar, 4: self.listar,
+                      5: self.excluir}
+            menu = ['1 - Cadastrar', '2 - Buscar', '3 - Alterar', '4 - Listar', '5 - Excluir', '0 - Sair']
+            opcao = self.tela.exibir_menu(menu, range(6))
+            if opcao != 0:
+                opcoes[opcao]()
+            else:
+                tela = False

@@ -122,6 +122,7 @@ class Time:
                     raise ValueError
                 else:
                     self.jogadores.remove(jogador)
+                    return True
         else:
             raise ListaError
     

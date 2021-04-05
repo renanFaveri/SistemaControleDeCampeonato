@@ -2,7 +2,7 @@ from MVC.entidade.campeonato import Campeonato
 from .controleDeEntidade import ControladorDeEntidade
 from MVC.limite.tela import Tela
 from MVC.limite.telaDeCampeonato import TelaDeCampeonatos
-
+from MVC.entidade.time import Time
 
 
 class ControladorDeCampeonatos(ControladorDeEntidade):
@@ -24,8 +24,7 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
     @property
     def campeonatos_registrados(self):
         return self.__campeonatos_registrados
-            
-            
+                 
     def buscar_nome(self, nome = None):
         if nome is None:
             nome = self.tela.recebe_str('Procurar por nome do campeonato: ')
@@ -34,7 +33,6 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
                 self.mostrar_informacoes(obj)
                 return obj
    
-
     def buscar_id(self):
         id_ = self.tela.recebe_int('Procurar por ID: ')
         contador = 0
@@ -45,21 +43,22 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
             else:
                 contador += 1
  
-        
     def buscar(self):
         buscando = True
         opcoes = {1: self.buscar_nome, 2: self.buscar_id}
         while buscando:
-            menu = ['1 - Buscar time por nome', '2 - Buscar time por ID', '0 - Voltar ao menu inicial']
+            menu = ['1 - Buscar campeonato por nome', '2 - Buscar campeonato por ID', '0 - Voltar ao menu inicial']
             opcao = self.tela.exibir_menu(menu, range(3))
             if opcao == 0:
                 buscando = False
-                return
             else:
-                opcoes[opcao]()
-            buscando = self.tela.recebe_int('Procurar outro campeonato? [1 - Sim / 0 - Não]: ', [0,1])         
-            
-            
+                resultado = opcoes[opcao]()
+                if resultado is None:
+                    self.tela.mostrar_mensagem('Não há campeonato cadastrado com esses dados.')
+                    buscando = self.tela.recebe_int('Procurar outro campeonato? [1 - Sim / 0 - Não]: ', [0,1])
+                else:
+                    return resultado        
+                   
     def verificacao(self, campeonato: Campeonato):
         if isinstance(campeonato, Campeonato):
             contador = 0
@@ -71,8 +70,7 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
                     contador += 1
         else:
             raise TypeError   
-        
-        
+            
     def cadastrar(self):
         cadastrando = True
         while cadastrando:
@@ -80,9 +78,11 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
             n_times = self.tela.recebe_str('Informe o número de times que disputará o campeonato: ')
 
             ################        adicionar calendário           ################
-
-            campeonato = Campeonato(nome_campeonato, n_times)
             try:
+                campeonato = Campeonato(nome_campeonato, n_times)  
+            except TypeError:
+                self.tela.mostrar_mensagem('»»»» Dados inválidos.')
+            try:                
                 self.verificacao(campeonato)
                 self.__campeonatos_registrados.append(campeonato)
                 self.mostrar_informacoes(campeonato)
@@ -92,25 +92,8 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
                 self.tela.mostrar_mensagem('»»»» Somente um campeonato pode ser cadastrado.')
             cadastrando = self.tela.recebe_int('Realizar nova operação? [1 - Sim / 0 - Não]: ', [0,1])
 
-        
-#     def adicionar(self, campeonato: Campeonato, controlador_times = self.__controlador_master.ct):
-#         if isinstance(campeonato, Campeonato) and isinstance(controlador_times, ControladorDeTimes):
-#             adicionando = True
-#             while adicionando:
-#                 try:
-#                     times = controlador_times.listar()
-#                     campeonato.adicionar_times(times)
-#                     self.tela.mostrar_mensagem(f'{len(times)} time(s) adicionado(s) ao campeonato {campeonato.nome}!')
-#                 except TypeError:
-#                     self.tela.mostrar_mensagem('»»»» Somente é possível adicionar times ao campeonato!')
-#                 except ValueError:
-#                     self.tela.mostrar_mensagem('»»»» O número de times informado excede o limite do campeonato!')
-#         else:
-#             raise TypeError
-
- 
     def alterar(self):
-        self.tela.exibir_mensagem('Escolha o cadastro de campeonato a ser alterado.')
+        self.tela.mostrar_mensagem('Escolha o cadastro de campeonato a ser alterado.')
         campeonato = self.buscar()
         if campeonato is not None:
             alterando = True
@@ -174,45 +157,44 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
                                     self.tela.mostrar_mensagem('»»»» Não foram informados times a serem adicionados.')
                             else:
                                 alterando = False
-                                self.alterar() 
                     else:
                             alterando = False
                             return
-                    alterando = self.tela.recebe_int('Realizar outra alteração? [1 - Sim / 0 - Não]: ', [0,1])
+                    alterando = self.tela.recebe_int('Realizar outra operação? [1 - Sim / 0 - Não]: ', [0,1])
                 except ValueError:
                     self.tela.mostrar_mensagem('»»»» Já existe um campeonato com esses dados.')
                     
-                  
-
     def listar(self, n_entradas = None):
         campeonatos = []
+        lista = self.__campeonatos_registrados
         if n_entradas is None:
-            menu = ['1 - Buscar todos os campeonatos cadastrados', '2 - Buscar campeonatos individualmente']
+            menu = ['1 - Listar todos os campeonatos cadastrados', '2 - Listar campeonatos individualmente']
             opcao = self.tela.exibir_menu(menu, range(1,3))
             if opcao == 1:
-                n_entradas = len(self.__campeonatos_registrados)
+                for campeonato in lista:
+                    self.mostrar_informacoes(campeonato)
+                return lista
             elif opcao == 2:
                 n_entradas = self.tela.recebe_int('Informe o número de campeonatos a serem listados: ')
-        for i in range(n_entradas):
-            campeonato = self.buscar()
-            campeonatos.append(campeonato)
-        return campeonatos
-    
+                for i in range(n_entradas):
+                    campeonato = self.buscar()
+                    if campeonato:
+                        campeonatos.append(campeonato)
+                    return campeonatos
     
     def mostrar_informacoes(self, campeonato):
         self.tela.mostrar_mensagem('')
-        self.tela.mostrar_mensagem('Resultado:')
-        self.tela.mostrar_mensagem(campeonato)
-  
-
+        self.tela.mostrar_mensagem('> ')
+        self.tela.mostrar_mensagem(campeonato)   
+        
     def excluir(self):
         campeonato = self.buscar()
-        self.__campeonatos_registrados.remove(campeonato)
-        if campeonato not in self.__campeonatos_registrados:
-            self.tela.mostrar_mensagem('Campeonato excluído com sucesso.')
-        else:
-            self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
-        
+        if campeonato:
+            self.__campeonatos_registrados.remove(campeonato)
+            if campeonato not in self.__campeonatos_registrados:
+                self.tela.mostrar_mensagem('Campeonato excluído com sucesso.')
+            else:
+                self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
         
     def abre_tela(self):
         while True:
@@ -226,5 +208,3 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
                     return
             except TypeError:
                 self.tela.mostrar_mensagem('»»»» Somente campeonatos podem executar essa ação!')
-                
-    
