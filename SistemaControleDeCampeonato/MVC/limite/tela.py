@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from MVC.exceptionCaracter import CaracterEspecialError
 
-
+ 
 class Tela(ABC):
     
     @abstractmethod
@@ -28,7 +28,7 @@ class Tela(ABC):
             
     def recebe_int(self, mensagem, opcoes_validas = None):
         while True:
-            resposta = input(f'{mensagem}: ')
+            resposta = input(f'\n{mensagem}: ')
             try:
                 resposta = int(resposta)
                 if opcoes_validas and resposta not in opcoes_validas:
@@ -60,4 +60,4 @@ class Tela(ABC):
                 
     def mostrar_mensagem(self, mensagem):
         print(mensagem)
-
+    

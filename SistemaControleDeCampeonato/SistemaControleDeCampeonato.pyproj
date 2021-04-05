@@ -36,6 +36,9 @@
     <Compile Include="MVC\Controle\controleDeCampeonato.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\Controle\controleJogarCampeonato.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\brando.py">
       <SubType>Code</SubType>
     </Compile>
@@ -108,10 +111,19 @@
     <Compile Include="MVC\exceptionCaracter.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\exceptionTime.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\exceptionVazia.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\limite\tela.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\limite\telaDeCampeonato.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\limite\telaDePartidas.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\limite\telaDePessoa.py">
