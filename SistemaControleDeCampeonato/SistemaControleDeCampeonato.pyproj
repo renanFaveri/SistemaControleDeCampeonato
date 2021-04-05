@@ -24,16 +24,16 @@
     <Compile Include="MVC\Controle\controleDeEntidade.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MVC\controle\ControleDePessoa.py">
+    <Compile Include="MVC\Controle\ControleDePessoa.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MVC\controle\controleDeSistema.py">
+    <Compile Include="MVC\Controle\controleDeSistema.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MVC\controle\controleDeTime.py">
+    <Compile Include="MVC\Controle\controleDeTime.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MVC\controle\controleDeCampeonato.py">
+    <Compile Include="MVC\Controle\controleDeCampeonato.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\brando.py">
@@ -93,7 +93,7 @@
     <Compile Include="MVC\entidade\posicao.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MVC\controle\__init__.py">
+    <Compile Include="MVC\Controle\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\severo.py">
@@ -136,7 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MVC\" />
-    <Folder Include="MVC\controle\" />
+    <Folder Include="MVC\Controle\" />
     <Folder Include="MVC\entidade\" />
     <Folder Include="MVC\limite\" />
   </ItemGroup>

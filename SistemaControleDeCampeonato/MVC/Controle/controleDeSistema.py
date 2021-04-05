@@ -2,7 +2,7 @@ from .ControleDePessoa import ControladorDePessoas
 from .controleDeTime import ControladorDeTimes
 from .controleDeCampeonato import ControladorDeCampeonatos
 from MVC.limite.telaInicial import TelaInicial
-
+from MVC.limite.tela import Tela
 
 class ControladorDeSistemas():
     

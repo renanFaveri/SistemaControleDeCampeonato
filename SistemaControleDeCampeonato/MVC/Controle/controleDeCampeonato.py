@@ -1,7 +1,9 @@
 from MVC.entidade.campeonato import Campeonato 
+from .controleDeEntidade import ControladorDeEntidade
 from MVC.limite.tela import Tela
 from MVC.limite.telaDeCampeonato import TelaDeCampeonatos
-from .controleDeEntidade import ControladorDeEntidade
+
+
 
 class ControladorDeCampeonatos(ControladorDeEntidade):
     
