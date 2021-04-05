@@ -7,12 +7,12 @@ from MVC.entidade.tecnico import Tecnico
 from MVC.entidade.jogador import Jogador
 
 class ControladorDeTimes(ControladorDeEntidade):
-        
+
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
         self.__times_registrados = []
         self.__tela = TelaDeTimes(self)
-
+        
     @property
     def cm(self):
         return self.__controlador_master
@@ -33,7 +33,7 @@ class ControladorDeTimes(ControladorDeEntidade):
             
     def buscar_nome(self, nome = None):
         if nome is None:
-            nome = self.tela.recebe_str('Procurar por nome do time: ')
+            nome = self.tela.recebe_str('Procurar time por nome: ')
         for obj in self.times_registrados:
             if obj.nome.lower() == nome.lower():
                 self.mostrar_informacoes(obj)
@@ -41,7 +41,7 @@ class ControladorDeTimes(ControladorDeEntidade):
 
 
     def buscar_id(self):
-        id_ = self.tela.recebe_int('Procurar por ID: ')
+        id_ = self.tela.recebe_int('Procurar time por ID: ')
         contador = 0
         while contador < len(self.times_registrados):
             if id_ == self.times_registrados[contador].id_:
@@ -90,18 +90,14 @@ class ControladorDeTimes(ControladorDeEntidade):
             alterando = True
             while alterando:
                 try:
-                    menu = ['Informe os atributos a serem alterados:',
-                            '1 - Nome',
-                            '2 - Técnico',
-                            '3 - Jogadores',
-                            '0 - Sair']
+                    menu = ['Informe os atributos a serem alterados:', '1 - Nome', '2 - Técnico', '3 - Jogadores', '0 - Sair']
                     opcao = self.tela.exibir_menu(menu, range(4))
                     if opcao == 1:
                         nome_time = self.tela.recebe_str('Informe o novo nome do time: ', 3)
                         if self.buscar_nome(nome_time):
                             raise ValueError
                         else:
-                            time.nome = nome_time
+                            time.nome = nome_time                          
                     elif opcao == 2:
                         menu = ['1 - Contratar técnico',
                                 '2 - Demitir técnico',
@@ -113,6 +109,7 @@ class ControladorDeTimes(ControladorDeEntidade):
                                 if tecnico:
                                     if tecnico.disponivel:
                                         time.tecnico = tecnico
+                                        tecnico.time = time
                                         tecnico.disponivel = False
                                         self.tela.mostrar_mensagem('»»»» Técnico contratado!')
                                     else:
@@ -126,14 +123,16 @@ class ControladorDeTimes(ControladorDeEntidade):
                             opcao = self.tela.exibir_menu(menu, range(2))
                             if opcao:
                                 time.tecnico.disponivel = True
+                                time.tecnico.time = None
                                 time.tecnico = None
                                 self.tela.mostrar_mensagem('Técnico demitido.')
+                            else:
+                                alterando = False
                         else:
                             alterando = False
                     elif opcao == 3:
-                        menu = ['1 - Contratar jogadores',
-                                '2 - Dispensar jogadores',
-                                '0 - Voltar ao menu inicial']
+                        menu = ['1 - Contratar jogadores','2 - Dispensar jogadores', '0 - Voltar ao menu inicial']
+                        opcao = self.tela.exibir_menu(menu, range(3))
                         if opcao == 1:
                             self.tela.mostrar_mensagem('Informe os jogadores a serem contratados.')
                             jogadores = self.cm.cp.listar_jogadores()
@@ -141,7 +140,7 @@ class ControladorDeTimes(ControladorDeEntidade):
                                 for jogador in jogadores:
                                     if not jogador.disponivel:
                                         raise ValueError
-                                if time.adicionar_jogadore(jogadores):
+                                if time.adicionar_jogadores(jogadores):
                                     self.tela.mostrar_mensagem('Jogadores contratados!')
                             except TypeError:
                                 self.tela.mostrar_mensagem('»»»» Somente é possível contratar jogadores.')
@@ -151,7 +150,7 @@ class ControladorDeTimes(ControladorDeEntidade):
                                 self.tela.mostrar_mensagem('»»»» Não foram informados jogadores a serem contratados.')
                         elif opcao == 2:
                             self.tela.mostrar_mensagem('Informe os jogadores a serem dispensados.')
-                            jogadores = self.__controlador_master.cp.listar_jogadores()
+                            jogadores = self.cm.cp.listar_jogadores()
                             try:
                                 if time.remover_jogadores(jogadores):
                                     self.tela.mostrar_mensagem('Jogadores dispensados!')
@@ -173,19 +172,25 @@ class ControladorDeTimes(ControladorDeEntidade):
         times = []
         lista = self.times_registrados
         if n_entradas is None:
-            menu = ['1 - Listar todos os times cadastrados', '2 - Listar times individualmente']
+            menu = ['1 - Listar todos os times cadastrados', '2 - Listar número determinado de times']
             opcao = self.tela.exibir_menu(menu, range(1,3))
             if opcao == 1:
+                n_entradas = len(lista)
+
                 for time in lista:
                     self.mostrar_informacoes(time)
-                return lista
+                times.extend(lista)
             elif opcao == 2:
                 n_entradas = self.tela.recebe_int('Informe o número de times a serem listados: ')
                 for i in range(n_entradas):
                     time = self.buscar()
-                    times.append(time)
-                return times
-
+                    if time:
+                        times.append(time)
+        if len(times) == 0:
+            raise ListaError()
+        else:
+            return times
+     
     def excluir(self):
         time = self.buscar()
         if time:
@@ -195,6 +200,7 @@ class ControladorDeTimes(ControladorDeEntidade):
             else:
                 self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
             
+    
     def mostrar_informacoes(self, time):
         self.tela.mostrar_mensagem('')
         self.tela.mostrar_mensagem('> ')
@@ -204,9 +210,12 @@ class ControladorDeTimes(ControladorDeEntidade):
         tela = True
         while tela:
             opcoes = {1: self.cadastrar, 2: self.buscar, 3: self.alterar, 4: self.listar, 5: self.excluir}
-            menu = ['1 - Cadastrar', '2 - Buscar', '3 - Alterar', '4 - Listar', '5 - Excluir', '0 - Sair']
+            menu = ['1 - Cadastrar time', '2 - Buscar time', '3 - Alterar time', '4 - Listar time',
+                    '5 - Excluir time', '0 - Sair']
             opcao = self.tela.exibir_menu(menu, range(6))
             if opcao != 0:
                 opcoes[opcao]()
             else:
                 tela = False
+       
+
