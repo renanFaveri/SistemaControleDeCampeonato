@@ -1,6 +1,10 @@
-from .tecnico import Tecnico
 from .jogador import Jogador
+from .tecnico import Tecnico
 from MVC.exceptionLista import ListaError
+
+#from .tecnico import Tecnico
+#from .jogador import Jogador
+#from MVC.exceptionLista import ListaError
 
 class Time:
     
@@ -9,7 +13,9 @@ class Time:
         self.__nome = nome
         self.__classificacao = None
         self.__jogadores = []
-        self.__n_jogadores = 15
+        self.__max_jogadores = 11
+        self.__min_jogadores = 2
+        self.__tem_goleiro = False
         self.__tecnico = None
         self.__vitorias = 0
         self.__empates = 0
@@ -42,10 +48,14 @@ class Time:
     @property
     def jogadores(self):
         return self.__jogadores
-
+    
     @property
-    def n_jogadores(self):
-        return self.__n_jogadores
+    def max_jogadores(self):
+        return self.__max_jogadores
+    
+    @property
+    def min_jogadores(self):
+        return self.__min_jogadores
     
     @property
     def tecnico(self):
@@ -85,7 +95,7 @@ class Time:
     
     @property
     def gols_marcados(self):
-        return gols_marcados
+        return self.__gols_marcados
     
     @gols_marcados.setter
     def gols_marcados(self, gols_marcados):
@@ -100,18 +110,22 @@ class Time:
     def gols_sofridos(self, gols_sofridos):
         if isinstance(gols_sofridos, int):
             self.__gols_sofridos = gols_sofridos
-
+            
     def adicionar_jogadores(self, jogadores: list):
         if isinstance(jogadores, list):
-            for jogador in jogadores:
-                if not isinstance(jogador, Jogador):
-                    raise TypeError
-            if (len(jogadores) + len(self.jogadores)) > self.n_jogadores:
+            if (len(jogadores) + len(self.jogadores)) > self.max_jogadores:
                 raise ValueError
             else:
-                self.jogadores.extend(jogadores)
+                for jogador in jogadores:
+                    if not isinstance(jogador, Jogador):
+                        raise TypeError
+                    else:
+                        self.jogadores.append(jogador)
+                        jogador.time = self
+                        jogador.disponivel = False
+                return True
         else:
-            raise ListaError
+            raise ListaError()
                     
     def remover_jogadores(self, jogadores: list):
         if isinstance(jogadores, list):
@@ -121,11 +135,15 @@ class Time:
                 elif jogador not in self.jogadores:
                     raise ValueError
                 else:
+                    jogador.time = None
+                    jogador.disponivel = True
                     self.jogadores.remove(jogador)
                     return True
         else:
-            raise ListaError
+            raise ListaError()
     
     def __str__(self):
-        return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
-    
+        if self.tecnico:
+            return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico.nome}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
+        else:
+            return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'

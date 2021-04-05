@@ -3,11 +3,12 @@ from .posicao import Posicao
 
 class Jogador(Pessoa):
     
-    def __init__(self, nome, posicao: Posicao, funcao = 'Jogador', gols_marcados = 0, gols_cedidos = 0, disponivel = True):
+    def __init__(self, nome, posicao: Posicao, funcao = 'Jogador', gols_marcados = 0, gols_concedidos = 0, disponivel = True):
         super().__init__(nome, funcao)
         self.__gols_marcados = gols_marcados
-        self.__gols_cedidos = gols_cedidos
+        self.__gols_concedidos = gols_concedidos
         self.__disponivel = disponivel
+        self.__time = None
         if isinstance(posicao, Posicao):
             self.__posicao = posicao
         else:
@@ -34,13 +35,22 @@ class Jogador(Pessoa):
             self.__gols_marcados = gols_marcados
     
     @property
-    def gols_cedidos(self):
-        return self.__gols_cedidos
+    def gols_concedidos(self):
+        return self.__gols_concedidos
     
-    @gols_cedidos.setter
-    def gols_cedidos(self, gols_cedidos):
-        if isinstance(gols_cedidos, int):
-            self.__gols_cedidos = gols_cedidos
+    @gols_concedidos.setter
+    def gols_concedidos(self, gols_concedidos):
+        if isinstance(gols_concedidos, int):
+            self.__gols_concedidos = gols_concedidos
+
+    @property
+    def time(self):
+        return self.__time
+
+    @time.setter
+    def time(self, time):
+        #if isinstance(time, Time):
+            self.__time = time
     
     @property
     def disponivel(self):
@@ -52,5 +62,7 @@ class Jogador(Pessoa):
             self.__disponivel = disponivel
             
     def __str__(self):
-        return super().__str__() + f"""; posição: {self.posicao}; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_cedidos}; disponibilidade: {self.disponivel}"""
-
+        if self.time:
+            return super().__str__() + f"""; posição: {self.posicao}; time atual: {self.time.nome}; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
+        else:
+            return super().__str__() + f"""; posição: {self.posicao}; Disponível: {self.disponivel}; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
