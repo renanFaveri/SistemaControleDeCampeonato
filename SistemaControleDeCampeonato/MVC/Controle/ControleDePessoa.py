@@ -29,7 +29,10 @@ class ControladorDePessoas(ControladorDeEntidade):
         self.__posicoes = {1: Goleiro(), 2: Defensor(), 3: MeioCampista(), 4: Atacante()}
         self.__mentalidades = {1: Defensiva(), 2: Moderada(), 3: Ofensiva()}
         self.__rigidez = {1: Brando(), 2: Moderado(), 3: Severo()}
-        self.__jogadores_registrados = [Jogador('Jogador Um', self.__posicoes[1]), Jogador('Jogador Dois', self.__posicoes[4]), Jogador('Jogador Tres', self.__posicoes[1]), Jogador('Jogador Quatro', self.__posicoes[4]), Jogador('Jogador Cinco', self.__posicoes[1])]
+        self.__jogadores_registrados = [Jogador('Jogador Um', self.__posicoes[1]), Jogador('Jogador Dois', self.__posicoes[4]), Jogador('Jogador Tres', self.__posicoes[1]), 
+                Jogador('Jogador Quatro', self.__posicoes[4]), Jogador('Jogador Cinco', self.__posicoes[1]), Jogador('Jogador Seis', self.__posicoes[4]), Jogador('Jogador Sete', self.__posicoes[1]),
+                Jogador('Jogador Oito', self.__posicoes[4]), Jogador('Jogador Nove', self.__posicoes[2]), Jogador('Jogador Dez', self.__posicoes[3]), Jogador('Jogador Onze', self.__posicoes[2]),
+                Jogador('Jogador Doze', self.__posicoes[3]), Jogador('Jogador Treze', self.__posicoes[4])]
         self.__tecnicos_registrados = []
         self.__arbitros_registrados = [Arbitro('Margarida', self.__rigidez[3])]
         self.__tela = TelaDePessoas(self)

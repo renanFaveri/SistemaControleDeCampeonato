@@ -1,9 +1,7 @@
 from .pessoa import Pessoa
 from .posicao import Posicao
-from .time import Time
 
 class Jogador(Pessoa):
-    
     def __init__(self, nome, posicao: Posicao, funcao = 'Jogador', time = None, gols_marcados = 0, gols_concedidos = 0, disponivel = True):
         super().__init__(nome, funcao)
         self.__gols_marcados = gols_marcados
@@ -50,8 +48,11 @@ class Jogador(Pessoa):
 
     @time.setter
     def time(self, time):
+        from .time import Time
         if isinstance(time, Time):
             self.__time = time
+        elif time is None:
+            self.__time = None
     
     @property
     def disponivel(self):

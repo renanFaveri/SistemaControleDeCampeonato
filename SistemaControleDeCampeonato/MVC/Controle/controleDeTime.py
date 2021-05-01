@@ -10,9 +10,9 @@ class ControladorDeTimes(ControladorDeEntidade):
 
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
-        self.__times_registrados = [Time('Man Utd', 'vermelho'), Time('Man City', 'azul')]
+        self.__times_registrados = [Time('Man Utd', 'red', 'white'), Time('Man City', 'light blue', 'white')]
         self.__times_registrados[0].adicionar_jogadores(self.__controlador_master.cp.jogadores_registrados[0:2])
-        self.__times_registrados[1].adicionar_jogadores(self.__controlador_master.cp.jogadores_registrados[2:4])
+        self.__times_registrados[1].adicionar_jogadores(self.__controlador_master.cp.jogadores_registrados[2:])
         self.__tela = TelaDeTimes(self)
         
     @property
@@ -35,10 +35,10 @@ class ControladorDeTimes(ControladorDeEntidade):
             
     def buscar_nome(self, nome = None):
         if nome is None:
-            nome = self.tela.recebe_str('Procurar time por nome: ')
+            pass
+            # nome = self.tela.recebe_str('Procurar time por nome: ')
         for obj in self.times_registrados:
             if obj.nome.lower() == nome.lower():
-                self.mostrar_informacoes(obj)
                 return obj
 
 
@@ -54,158 +54,145 @@ class ControladorDeTimes(ControladorDeEntidade):
 
     def buscar(self):
         buscando = True
-        opcoes = {1: self.buscar_nome, 2: self.buscar_id}
         while buscando:
-            menu = ['1 - Buscar time por nome', '2 - Buscar time por ID', '0 - Voltar ao menu inicial']
-            opcao = self.tela.exibir_menu(menu, range(3))
-            if opcao == 0:
-                buscando = False
-            else:
-                resultado = opcoes[opcao]()
-                if resultado is None:
-                    self.tela.mostrar_mensagem('Não há time cadastrado com esses dados.')
-                    buscando = self.tela.recebe_int('Procurar outro time? [1 - Sim / 0 - Não]: ', [0,1])
+            self.tela.menu_buscar_times()
+            botao, valores = self.tela.abreTela()
+            try:
+                if botao == 'Confirmar':
+                    if valores['check']:
+                        self.tela.fechaTela()
+                        return self.listar()
+                    else:
+                        nome_time = self.tela.selecionar_entradas((valores['in_time'], valores['lst_time']))
+                        time = self.buscar_nome(nome_time)
+                        if not time:
+                            raise EntradaVaziaError()
+                        else:
+                            self.tela.fechaTela()
+                            return self.alterar(time)
                 else:
-                    return resultado
-            
+                    self.tela.fechaTela()
+                    break
+            except EntradaVaziaError:
+                self.tela.popup_msg_erro_cadastro()
+            finally:
+                self.tela.fechaTela()            
 
 
     def cadastrar(self):
         cadastrando = True
         while cadastrando:
-            try:
-                nome_time = self.tela.recebe_str('Informe o nome do time: ', 3)
-                cor = self.tela.recebe_str('Informe a cor principal do time: ', 3)
-                time = Time(nome_time, cor)
-                if self.buscar_nome(nome_time):
-                    raise ValueError
-                else:
-                    self.__times_registrados.append(time)
-                    self.mostrar_informacoes(time)
-            except ValueError:
-                self.tela.mostrar_mensagem('»»»» Já existe um time com esses dados.')
-            except TypeError:
-                self.tela.mostrar_mensagem('»»»» Dados inválidos.')
-            cadastrando = self.tela.recebe_int('Realizar nova operação? [1 - Sim / 0 - Não]: ', [0,1])
-
-                
-                
-    def alterar(self):
-        self.tela.mostrar_mensagem('Escolha o cadastro de time a ser alterado.')
-        time = self.buscar()
-        if time is not None:
-            alterando = True
-            while alterando:
+            self.tela.tela_cadastrar()
+            botao, valores = self.tela.abreTela()
+            if botao == 'Confirmar':
                 try:
-                    menu = ['Informe os atributos a serem alterados:', '1 - Nome', '2 - Técnico', '3 - Jogadores', '0 - Sair']
-                    opcao = self.tela.exibir_menu(menu, range(4))
-                    if opcao == 1:
-                        nome_time = self.tela.recebe_str('Informe o novo nome do time: ', 3)
-                        if self.buscar_nome(nome_time):
-                            raise ValueError
-                        else:
-                            time.nome = nome_time                          
-                    elif opcao == 2:
-                        menu = ['1 - Contratar técnico',
-                                '2 - Demitir técnico',
-                                '0 - Voltar ao menu inicial']
-                        opcao = self.tela.exibir_menu(menu, range(3))
-                        if opcao == 1:
-                            try:
-                                tecnico = self.cm.cp.buscar(self.cm.cp.tecnicos_registrados)
-                                if tecnico:
-                                    if tecnico.disponivel:
-                                        time.tecnico = tecnico
-                                        tecnico.time = time
-                                        tecnico.disponivel = False
-                                        self.tela.mostrar_mensagem('»»»» Técnico contratado!')
-                                    else:
-                                        raise ValueError
-                                else:
-                                    self.tela.mostrar_mensagem('»»»» Não foram encontrados técnicos com esses dados.')
-                            except ValueError:
-                                self.tela.mostrar_mensagem('»»»» Técnico indisponível.')
-                        elif opcao == 2:
-                            menu = ['Confirmar demissão do técnico?  [1 - Sim / 0 - Não]']
-                            opcao = self.tela.exibir_menu(menu, range(2))
-                            if opcao:
-                                time.tecnico.disponivel = True
-                                time.tecnico.time = None
-                                time.tecnico = None
-                                self.tela.mostrar_mensagem('Técnico demitido.')
-                            else:
-                                alterando = False
-                        else:
-                            alterando = False
-                    elif opcao == 3:
-                        menu = ['1 - Contratar jogadores','2 - Dispensar jogadores', '0 - Voltar ao menu inicial']
-                        opcao = self.tela.exibir_menu(menu, range(3))
-                        if opcao == 1:
-                            self.tela.mostrar_mensagem('Informe os jogadores a serem contratados.')
-                            jogadores = self.cm.cp.listar_jogadores()
-                            try:
-                                lst=[]
-                                for jogador in jogadores:
-                                    if jogador.disponivel:
-                                        lst.append(jogador)
-                                if time.adicionar_jogadores(lst):
-                                    self.tela.mostrar_mensagem('Jogadores contratados!')
-                            except TypeError:
-                                self.tela.mostrar_mensagem('»»»» Somente é possível contratar jogadores.')
-                            except ListaError:
-                                self.tela.mostrar_mensagem('»»»» Não foram informados jogadores a serem contratados.')
-                        elif opcao == 2:
-                            self.tela.mostrar_mensagem('Informe os jogadores a serem dispensados.')
-                            jogadores = self.cm.cp.listar_jogadores()
-                            try:
-                                if time.remover_jogadores(jogadores):
-                                    self.tela.mostrar_mensagem('Jogadores dispensados!')
-                            except TypeError:
-                                self.tela.mostrar_mensagem('»»»» Somente é possível remover jogadores.')
-                            except ValueError:
-                                self.tela.mostrar_mensagem('»»»» Impossível remover jogadores não contratados pelo time.')
-                            except ListaError:
-                                self.tela.mostrar_mensagem('»»»» Não foram informados jogadores a serem adicionados.')
-                        else:
-                            alterando = False
+                    nome_time = self.tela.strip_str(valores['time_nome'])
+                    cor_primaria = valores['cor1']
+                    cor_secundaria = valores['cor2']
+                    if 'None' in (nome_time, cor_primaria, cor_secundaria) or\
+                                '' in (nome_time, cor_primaria, cor_secundaria) or\
+                                self.buscar_nome(nome_time):
+                        raise ValueError
                     else:
-                        return
-                    alterando = self.tela.recebe_int('Realizar outra operação? [1 - Sim / 0 - Não]: ', [0,1])
+                        time = Time(nome_time, cor_primaria, cor_secundaria)
+                        self.__times_registrados.append(time)
+                        self.tela.fechaTela()
+                        break
                 except ValueError:
-                    self.tela.mostrar_mensagem('»»»» Já existe um time com esses dados.')
+                    self.tela.popup_msg_erro_cadastro()
+                except TypeError:
+                    self.tela.popup_msg_erro_cadastro()
+                except EntradaVaziaError:
+                    self.tela.popup_msg_erro_cadastro()
+                finally:
+                    self.tela.fechaTela()
+            else:
+                self.tela.fechaTela()
+                break
+
+    
+    def contratar(self, time):
+        self.tela.tela_contratar_jogador(time)
+        botao, valores = self.tela.abreTela()
+        if botao == 'Confirmar':
+            negociados = valores['box_goleiros'] + valores['box_defensores'] + valores['box_meio_campistas'] + valores['box_atacantes']
+            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, jogador) for jogador in negociados]
+            botao = self.tela.popup_confirmar_compra(jogadores)
+            if botao == 'Confirmar':
+                time.adicionar_jogadores(jogadores)
+        self.tela.fechaTela()
+        return 
+
+    def vender(self, time):
+        self.tela.tela_vender_jogador(time)
+        botao, valores = self.tela.abreTela()
+        if botao == 'Confirmar':
+            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, jogador) for jogador in valores['lstbox']]
+            botao = self.tela.popup_confirmar_venda(jogadores)
+            if botao == 'Confirmar':
+                time.remover_jogadores(jogadores)
+        self.tela.fechaTela()
+        return 
+
+     
+    def alterar(self, time):
+        while True:
+            self.tela.janela_time(time)
+            botao, valores = self.tela.abreTela()
+            janela_aux = self.tela.janela
+            if botao == 'excluir':
+                excluiu = self.excluir(time)
+                self.tela.fechaTela()
+                if excluiu:
+                    break 
+            elif botao == 'Vender':
+                self.vender(time)
+                self.tela.janela = janela_aux
+                self.tela.fechaTela()
+            elif botao == 'Contratar':
+                self.contratar(time)
+                self.tela.janela = janela_aux
+                self.tela.fechaTela()
+            elif botao == 'Confirmar':
+                alterou = False
+                if valores['cor1'] != time.cor_primaria or valores['cor2'] != time.cor_secundaria or valores['time_nome'] != time.nome:
+                    alterou = True
+                if alterou:
+                    botao = self.tela.popup_confirmar_alteracao()
+                    if botao == 'Confirmar':
+                        time.nome = valores['time_nome'].title()
+                        time.cor_secundaria = valores['cor2']
+                        time.cor_primaria = valores['cor1']
+                self.tela.fechaTela()
+            else:
+                self.tela.janela = janela_aux
+                self.tela.fechaTela()
+                break
+        return self.lista()
+            
 
     def listar(self, n_entradas = None):
-        times = []
-        lista = self.times_registrados
-        if n_entradas is None:
-            menu = ['1 - Listar todos os times cadastrados', '2 - Listar número determinado de times']
-            opcao = self.tela.exibir_menu(menu, range(1,3))
-            if opcao == 1:
-                n_entradas = len(lista)
+        while True:
+            self.tela.listar_times()
+            botao, valores = self.tela.abreTela()
+            time = botao
+            self.tela.fechaTela()
+            try:
+                if time in self.times_registrados:
+                    return self.alterar(time)
+                else:
+                    break
+            except:
+                pass
 
-                for time in lista:
-                    self.mostrar_informacoes(time)
-                times.extend(lista)
-            elif opcao == 2:
-                n_entradas = self.tela.recebe_int('Informe o número de times a serem listados: ')
-                for i in range(n_entradas):
-                    time = self.buscar()
-                    if time:
-                        times.append(time)
-        if len(times) == 0:
-            raise ListaError()
-        else:
-            return times
      
-    def excluir(self):
-        time = self.buscar()
-        if time:
-            self.__times_registrados.remove(time)
-            if time not in self.__times_registrados:
-                self.tela.mostrar_mensagem('Time excluído com sucesso.')
-            else:
-                self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
-            
+    def excluir(self, time):
+        botao = self.tela.popup_msg_excluir()
+        if botao == 'Confirmar':
+            i = self.times_registrados.index(time)
+            time.remover_jogadores(time.jogadores.copy())
+            self.times_registrados.pop(i)
+     
     
     def mostrar_informacoes(self, time):
         self.tela.mostrar_mensagem('')
@@ -216,11 +203,14 @@ class ControladorDeTimes(ControladorDeEntidade):
         tela = True
         while tela:
             opcoes = {1: self.cadastrar, 2: self.buscar, 3: self.alterar, 4: self.listar, 5: self.excluir}
-            menu = ['1 - Cadastrar time', '2 - Buscar time', '3 - Alterar time', '4 - Listar time',
-                    '5 - Excluir time', '0 - Sair']
-            opcao = self.tela.exibir_menu(menu, range(6))
-            if opcao != 0:
-                opcoes[opcao]()
+            self.tela.exibir_menu()
+            botao, valores = self.tela.abreTela()
+            self.tela.fechaTela()
+            if botao == 'Confirmar':
+                for key in valores:
+                    if valores[key]:
+                        opcoes[key]()
             else:
                 tela = False
+
 

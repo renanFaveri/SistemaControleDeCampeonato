@@ -1,13 +1,14 @@
 from MVC.exceptionLista import ListaError
+from .jogador import Jogador
 from .tecnico import Tecnico
 
-
 class Time:
-    
-    def __init__(self, nome, cor): 
+  
+    def __init__(self, nome, cor_primaria = None, cor_secundaria = None): 
         self.__id = id(self)
         self.__nome = nome
-        self.__cor = cor
+        self.__cor_primaria = cor_primaria
+        self.__cor_secundaria = cor_secundaria
         self.__classificacao = None
         self.__jogadores = []
         self.__max_jogadores = 11
@@ -20,6 +21,7 @@ class Time:
         self.__gols_marcados = 0
         self.__gols_sofridos = 0
     
+
     @property
     def id_(self):
         return self.__id   
@@ -34,14 +36,22 @@ class Time:
             self.__nome = nome
     
     @property
-    def cor(self):
-        return self.__cor
+    def cor_primaria(self):
+        return self.__cor_primaria
 
-    @cor.setter
-    def cor(self, cor):
+    @cor_primaria.setter
+    def cor_primaria(self, cor):
         if isinstance(cor, str):
-            self.__cor = cor
+            self.__cor_primaria = cor
 
+    @property
+    def cor_secundaria(self):
+        return self.__cor_secundaria
+
+    @cor_secundaria.setter
+    def cor_secundaria(self, cor):
+        if isinstance(cor, str):
+            self.__cor_secundaria = cor
 
     @property
     def classificacao(self):
@@ -67,7 +77,8 @@ class Time:
     @property
     def tecnico(self):
         return self.__tecnico
-    
+        
+
     @tecnico.setter
     def tecnico(self, tecnico: Tecnico):
         if isinstance(tecnico, Tecnico):
@@ -124,7 +135,6 @@ class Time:
                 raise ValueError
             else:
                 for jogador in jogadores:
-                    from MVC.entidade.jogador import Jogador
                     if not isinstance(jogador, Jogador):
                         raise TypeError
                     else:
@@ -146,7 +156,7 @@ class Time:
                     jogador.time = None
                     jogador.disponivel = True
                     self.jogadores.remove(jogador)
-                    return True
+            return True
         else:
             raise ListaError()
     
@@ -155,4 +165,4 @@ class Time:
             return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico.nome}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
         else:
             return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
-    
+        

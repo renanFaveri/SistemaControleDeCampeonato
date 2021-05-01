@@ -101,6 +101,7 @@ class Partida:
 
     @tela_final.setter
     def tela_final(self, tela_final):
+        from MVC.limite.telaDePartidas import TelaDePartidas
         if isinstance(tela_final, TelaDePartidas):
             self.__tela_final = tela_final
     
@@ -127,4 +128,4 @@ class Partida:
         return f"""Partida: id {self.id_}: 
 {self.time_anfitriao.nome.upper()} {self.placar} {self.time_visitante.nome.upper()}
 Árbitro: {self.arbitro_designado.nome}"""
-    
+        

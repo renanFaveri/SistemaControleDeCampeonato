@@ -28,21 +28,7 @@ class JogarCampeonato:
     def partidas(self):
         return self.__p
     
-    def selecionar_entradas(self, tupla: tuple):
-            if isinstance(tupla, tuple):
-                entrada1 = self.tela.strip_str(tupla[0])
-                entrada2 = self.tela.strip_str(tupla[1])
-                if entrada1 == entrada2:
-                    if entrada1 != '':
-                        return entrada1
-                else:
-                    if entrada1 != '':
-                        return entrada1
-                    else:
-                        return entrada2
-            else:
-                return
-
+    
     def jogar_amistoso(self, time_anfitriao = None, time_visitante = None, arbitro_designado = None,
                       data_do_jogo = None):
         while True:
@@ -50,13 +36,13 @@ class JogarCampeonato:
                 self.tela.menu_criar_partida()
                 botao, valores = self.tela.abreTela()
                 if botao == 'Confirmar':
-                    time_anfitriao = self.selecionar_entradas((valores['in_anf'], valores['lst_anf']))
+                    time_anfitriao = self.tela.selecionar_entradas((valores['in_anf'], valores['lst_anf']))
                     if time_anfitriao != None:
                         time_anfitriao = self.cm.ct.buscar_nome(time_anfitriao)
-                    time_visitante = self.selecionar_entradas((valores['in_vis'], valores['lst_vis']))
+                    time_visitante = self.tela.selecionar_entradas((valores['in_vis'], valores['lst_vis']))
                     if time_visitante != None:
                         time_visitante = self.cm.ct.buscar_nome(time_visitante)                    
-                    arbitro_designado = self.selecionar_entradas((valores['in_arb'], valores['lst_arb']))
+                    arbitro_designado = self.tela.selecionar_entradas((valores['in_arb'], valores['lst_arb']))
                     if arbitro_designado != None:
                         arbitro_designado = self.cm.cp.buscar_nome(nome=arbitro_designado, lista=self.cm.cp.arbitros_registrados)
                 else:
@@ -103,7 +89,7 @@ class JogarCampeonato:
                         lista = self.cm.ct.times_registrados
                         campeonato = None
                     else:
-                        nome_campeonato = self.selecionar_entradas((valores['in_camp'], valores['lst_camp']))
+                        nome_campeonato = self.tela.selecionar_entradas((valores['in_camp'], valores['lst_camp']))
                         campeonato = self.cm.cc.buscar_nome(nome_campeonato)
                         if not campeonato:
                             raise EntradaVaziaError()
@@ -132,9 +118,6 @@ class JogarCampeonato:
                 self.tela.popup_msg_erro_partidas()
                 self.tela.fechaTela()
     
-    
-    
-
     
     def jogar_partida(self, partida: Partida):
 
@@ -179,10 +162,6 @@ class JogarCampeonato:
                 tupla = (marcadores[i], ltemp_gols[i])
                 j_t.append(tupla)
             return j_t              
-        
-        def atl_gols_time(time, gols_p, gols_c):
-            time.gols_marcados = gols_p
-            time.gols_sofridos = gols_c
             
         def atl_jogadores(jogadores):
             for j in jogadores:
@@ -212,8 +191,6 @@ class JogarCampeonato:
         tv = partida.time_visitante
         gols_a = sort_gols()
         gols_v = sort_gols()
-        atl_gols_time(ta, gols_a, gols_v)
-        atl_gols_time(tv, gols_v, gols_a)
         placar = f'{gols_a} x {gols_v}'
         partida.placar = placar
         marc_a = sort_jog_marc(ta, gols_a)
@@ -264,7 +241,7 @@ class JogarCampeonato:
                                 partidas.append(partida)
                         campeonato = None
                     else:
-                        nome_campeonato = self.selecionar_entradas((valores['in_camp'], valores['lst_camp']))
+                        nome_campeonato = self.tela.selecionar_entradas((valores['in_camp'], valores['lst_camp']))
                         campeonato = self.cm.cc.buscar_nome(nome_campeonato)
                         if not campeonato:
                             raise EntradaVaziaError()
@@ -316,7 +293,7 @@ class JogarCampeonato:
                                 partidas.append(partida)
                         campeonato = None
                     else:
-                        nome_campeonato = self.selecionar_entradas((valores['in_camp'], valores['lst_camp']))
+                        nome_campeonato = self.tela.selecionar_entradas((valores['in_camp'], valores['lst_camp']))
                         campeonato = self.cm.cc.buscar_nome(nome_campeonato)
                         if not campeonato:
                             raise EntradaVaziaError()
@@ -339,8 +316,9 @@ class JogarCampeonato:
             botao, valores = self.tela.abreTela()
             self.tela.fechaTela()
             opcoes = {'cp': self.jogar_amistoso, 'cps': self.criar_partidas, 'camp': self.jogar_camp, 'vpj': self.ver_paridas_jogadas}
-            if botao != 0:
+            if botao in opcoes:
                 opcoes[botao]()
             else:
                 tela = False
-          
+            
+              

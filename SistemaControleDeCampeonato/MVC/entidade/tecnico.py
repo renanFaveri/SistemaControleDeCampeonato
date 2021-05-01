@@ -1,7 +1,6 @@
 from .pessoa import Pessoa
 from .mentalidade import Mentalidade
 
-
 class Tecnico(Pessoa):
 
     
@@ -29,6 +28,7 @@ class Tecnico(Pessoa):
 
     @time.setter
     def time(self, time):
+        from .time import Time
         if isinstance(time, Time):
             self.__time = time
             

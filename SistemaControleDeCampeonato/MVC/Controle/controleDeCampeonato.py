@@ -217,4 +217,4 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
             except TypeError:
                 self.tela.mostrar_mensagem('»»»» Somente campeonatos podem executar essa ação!')
                 
-    
+        

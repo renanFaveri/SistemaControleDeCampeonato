@@ -17,14 +17,13 @@ class ControladorDeSistemas():
     def iniciar(self):
         #jogando = True
         while True:
-            menu = ['1 - Cadastro de pessoas', '2 - Cadastro de times','3 - Cadastro de campeonatos', '4 - Jogar campeonato',
-                    '0 - Sair']
-            opcoes = {1: self.cp.abre_tela, 2: self.ct.abre_tela, 3: self.cc.abre_tela, 4: self.jc.abre_tela}
-            opcao = self.tela.exibir_menu(menu, range(5))
-            if opcao != 0:
-                opcoes[opcao]()
+            opcoes = {'cp': self.cp.abre_tela, 'ct': self.ct.abre_tela, 'cc': self.cc.abre_tela, 'jpc': self.jc.abre_tela}
+            self.tela.exibir_menu()
+            botao, valores = self.tela.abreTela()
+            self.tela.fechaTela()
+            if botao in opcoes:
+                opcoes[botao]()
             else:
-                self.tela.mostrar_mensagem('Seu computador está sendo desligado.')
                 return
         
     @property
@@ -52,3 +51,4 @@ class ControladorDeSistemas():
     def jc(self):
         return self.__jogar_campeonato
         
+    
