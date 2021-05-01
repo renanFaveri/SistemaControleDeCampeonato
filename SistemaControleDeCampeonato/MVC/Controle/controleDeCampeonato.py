@@ -216,3 +216,5 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
                     tela = False
             except TypeError:
                 self.tela.mostrar_mensagem('»»»» Somente campeonatos podem executar essa ação!')
+                
+    

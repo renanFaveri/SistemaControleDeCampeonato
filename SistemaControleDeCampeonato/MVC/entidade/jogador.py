@@ -1,14 +1,15 @@
 from .pessoa import Pessoa
 from .posicao import Posicao
+from .time import Time
 
 class Jogador(Pessoa):
     
-    def __init__(self, nome, posicao: Posicao, funcao = 'Jogador', gols_marcados = 0, gols_concedidos = 0, disponivel = True):
+    def __init__(self, nome, posicao: Posicao, funcao = 'Jogador', time = None, gols_marcados = 0, gols_concedidos = 0, disponivel = True):
         super().__init__(nome, funcao)
         self.__gols_marcados = gols_marcados
         self.__gols_concedidos = gols_concedidos
         self.__disponivel = disponivel
-        self.__time = None
+        self.__time = time
         if isinstance(posicao, Posicao):
             self.__posicao = posicao
         else:
@@ -49,7 +50,7 @@ class Jogador(Pessoa):
 
     @time.setter
     def time(self, time):
-        #if isinstance(time, Time):
+        if isinstance(time, Time):
             self.__time = time
     
     @property
@@ -66,3 +67,4 @@ class Jogador(Pessoa):
             return super().__str__() + f"""; posição: {self.posicao}; time atual: {self.time.nome}; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
         else:
             return super().__str__() + f"""; posição: {self.posicao}; Disponível: {self.disponivel}; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
+

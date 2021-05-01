@@ -26,13 +26,14 @@ class ControladorDePessoas(ControladorDeEntidade):
     
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
-        self.__jogadores_registrados = []
-        self.__tecnicos_registrados = []
-        self.__arbitros_registrados = []
-        self.__tela = TelaDePessoas(self)
         self.__posicoes = {1: Goleiro(), 2: Defensor(), 3: MeioCampista(), 4: Atacante()}
         self.__mentalidades = {1: Defensiva(), 2: Moderada(), 3: Ofensiva()}
         self.__rigidez = {1: Brando(), 2: Moderado(), 3: Severo()}
+        self.__jogadores_registrados = [Jogador('Jogador Um', self.__posicoes[1]), Jogador('Jogador Dois', self.__posicoes[4]), Jogador('Jogador Tres', self.__posicoes[1]), Jogador('Jogador Quatro', self.__posicoes[4]), Jogador('Jogador Cinco', self.__posicoes[1])]
+        self.__tecnicos_registrados = []
+        self.__arbitros_registrados = [Arbitro('Margarida', self.__rigidez[3])]
+        self.__tela = TelaDePessoas(self)
+        
 
     @property
     def tela(self):
@@ -141,8 +142,9 @@ class ControladorDePessoas(ControladorDeEntidade):
             else:
                 cadastrando = False
         
-    def buscar_nome(self, lista):
-        nome = self.tela.recebe_str('Procurar por nome: ')
+    def buscar_nome(self, lista = None, nome = None):
+        if nome is None:
+            nome = self.tela.recebe_str('Procurar por nome: ')
         for obj in lista:
             if obj.nome.lower() == nome.lower():
                 self.mostrar_informacoes(obj)
@@ -420,7 +422,7 @@ class ControladorDePessoas(ControladorDeEntidade):
             menu = ['1 - Listar todos os jogadores cadastrados', '2 - Listar número determinado de jogadores']
             opcao = self.tela.exibir_menu(menu, range(1,3))
             if opcao == 1:
-                for jogador in jogadores:
+                for jogador in lista:
                     self.mostrar_informacoes(jogador)
                 jogadores.extend(lista)
             elif opcao == 2:
@@ -559,3 +561,4 @@ class ControladorDePessoas(ControladorDeEntidade):
                 opcoes[opcao]()
             else:
                 tela = False
+

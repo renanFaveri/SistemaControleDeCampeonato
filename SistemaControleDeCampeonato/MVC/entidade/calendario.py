@@ -11,7 +11,7 @@ class Calendario:
     
     @data_inicial.setter
     def data_inicial(self, data_inicial):
-        ### fazer conferencia
+
         self.__data_inicial = data_inicial
         
     @property
@@ -20,7 +20,7 @@ class Calendario:
     
     @data_final.setter
     def data_final(self, data_final):
-        ### fazer conferencia
+
         self.__data_final = data_final
         
     @property
@@ -29,4 +29,5 @@ class Calendario:
     
     def definir_calendario(self, data_inicial, data_final):
         pass
-    ########### implementar
+
+    

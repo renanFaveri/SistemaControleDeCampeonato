@@ -10,7 +10,9 @@ class ControladorDeTimes(ControladorDeEntidade):
 
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
-        self.__times_registrados = []
+        self.__times_registrados = [Time('Man Utd', 'vermelho'), Time('Man City', 'azul')]
+        self.__times_registrados[0].adicionar_jogadores(self.__controlador_master.cp.jogadores_registrados[0:2])
+        self.__times_registrados[1].adicionar_jogadores(self.__controlador_master.cp.jogadores_registrados[2:4])
         self.__tela = TelaDeTimes(self)
         
     @property
@@ -66,12 +68,15 @@ class ControladorDeTimes(ControladorDeEntidade):
                 else:
                     return resultado
             
+
+
     def cadastrar(self):
         cadastrando = True
         while cadastrando:
             try:
                 nome_time = self.tela.recebe_str('Informe o nome do time: ', 3)
-                time = Time(nome_time)
+                cor = self.tela.recebe_str('Informe a cor principal do time: ', 3)
+                time = Time(nome_time, cor)
                 if self.buscar_nome(nome_time):
                     raise ValueError
                 else:
@@ -82,7 +87,9 @@ class ControladorDeTimes(ControladorDeEntidade):
             except TypeError:
                 self.tela.mostrar_mensagem('»»»» Dados inválidos.')
             cadastrando = self.tela.recebe_int('Realizar nova operação? [1 - Sim / 0 - Não]: ', [0,1])
-  
+
+                
+                
     def alterar(self):
         self.tela.mostrar_mensagem('Escolha o cadastro de time a ser alterado.')
         time = self.buscar()
@@ -137,15 +144,14 @@ class ControladorDeTimes(ControladorDeEntidade):
                             self.tela.mostrar_mensagem('Informe os jogadores a serem contratados.')
                             jogadores = self.cm.cp.listar_jogadores()
                             try:
+                                lst=[]
                                 for jogador in jogadores:
-                                    if not jogador.disponivel:
-                                        raise ValueError
-                                if time.adicionar_jogadores(jogadores):
+                                    if jogador.disponivel:
+                                        lst.append(jogador)
+                                if time.adicionar_jogadores(lst):
                                     self.tela.mostrar_mensagem('Jogadores contratados!')
                             except TypeError:
                                 self.tela.mostrar_mensagem('»»»» Somente é possível contratar jogadores.')
-                            except ValueError:
-                                self.tela.mostrar_mensagem('»»»» Impossível contratar jogadores não registrados.')
                             except ListaError:
                                 self.tela.mostrar_mensagem('»»»» Não foram informados jogadores a serem contratados.')
                         elif opcao == 2:
@@ -217,5 +223,4 @@ class ControladorDeTimes(ControladorDeEntidade):
                 opcoes[opcao]()
             else:
                 tela = False
-       
 

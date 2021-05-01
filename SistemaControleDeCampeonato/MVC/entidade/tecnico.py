@@ -47,4 +47,4 @@ class Tecnico(Pessoa):
         else:
             return super().__str__() + f'; mentalidade: {self.mentalidade}; Dosponível: {self.disponivel}'
 
-
+           

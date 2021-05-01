@@ -1,16 +1,13 @@
-from .jogador import Jogador
-from .tecnico import Tecnico
 from MVC.exceptionLista import ListaError
+from .tecnico import Tecnico
 
-#from .tecnico import Tecnico
-#from .jogador import Jogador
-#from MVC.exceptionLista import ListaError
 
 class Time:
     
-    def __init__(self, nome):
+    def __init__(self, nome, cor): 
         self.__id = id(self)
         self.__nome = nome
+        self.__cor = cor
         self.__classificacao = None
         self.__jogadores = []
         self.__max_jogadores = 11
@@ -36,6 +33,16 @@ class Time:
         if isinstance(nome, str):
             self.__nome = nome
     
+    @property
+    def cor(self):
+        return self.__cor
+
+    @cor.setter
+    def cor(self, cor):
+        if isinstance(cor, str):
+            self.__cor = cor
+
+
     @property
     def classificacao(self):
         return self.__classificacao
@@ -117,6 +124,7 @@ class Time:
                 raise ValueError
             else:
                 for jogador in jogadores:
+                    from MVC.entidade.jogador import Jogador
                     if not isinstance(jogador, Jogador):
                         raise TypeError
                     else:
@@ -147,3 +155,4 @@ class Time:
             return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico.nome}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
         else:
             return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
+    

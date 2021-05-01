@@ -151,6 +151,10 @@
     <Folder Include="MVC\Controle\" />
     <Folder Include="MVC\entidade\" />
     <Folder Include="MVC\limite\" />
+    <Folder Include="Img\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Img\sem_titulo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

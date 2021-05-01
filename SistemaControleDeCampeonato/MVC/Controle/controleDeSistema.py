@@ -8,8 +8,8 @@ from .controleJogarCampeonato import JogarCampeonato
 class ControladorDeSistemas():
     
     def __init__(self):
-        self.__controlador_pessoas = ControladorDePessoas(self)
-        self.__controlador_times = ControladorDeTimes(self)
+        self.__controlador_pessoas = ControladorDePessoas(self)    
+        self.__controlador_times = ControladorDeTimes(self)            
         self.__controlador_campeonatos = ControladorDeCampeonatos(self)
         self.__jogar_campeonato = JogarCampeonato(self)
         self.__tela = TelaInicial(self)
@@ -24,6 +24,7 @@ class ControladorDeSistemas():
             if opcao != 0:
                 opcoes[opcao]()
             else:
+                self.tela.mostrar_mensagem('Seu computador está sendo desligado.')
                 return
         
     @property
@@ -50,4 +51,4 @@ class ControladorDeSistemas():
     @property
     def jc(self):
         return self.__jogar_campeonato
-    
+        

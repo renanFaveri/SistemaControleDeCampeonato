@@ -14,7 +14,8 @@ class Partida:
         self.__jogada = False
         self.__sumula = sumula
         self.__placar = None
-        self.__dados = None
+        self.__relatorio = None
+        self.__tela_final = None
 
         
     @property
@@ -47,7 +48,10 @@ class Partida:
 
     @property
     def placar(self):
-        return self.__placar
+        if self.__placar == None:
+            return '0 x 0'
+        else:
+            return self.__placar
     
     @placar.setter
     def placar(self, placar):
@@ -83,13 +87,22 @@ class Partida:
             self.__jogada = jogada
 
     @property
-    def dados(self):
-        return self.__dados
+    def relatorio(self):
+        return self.__relatorio
     
-    @dados.setter
-    def dados(self, dados):
-        if isinstance(dados, list):
-            self.__dados = dados
+    @relatorio.setter
+    def relatorio(self, relatorio):
+        if isinstance(relatorio, list):
+            self.__relatorio = relatorio
+
+    @property
+    def tela_final(self):
+        return self.__tela_final
+
+    @tela_final.setter
+    def tela_final(self, tela_final):
+        if isinstance(tela_final, TelaDePartidas):
+            self.__tela_final = tela_final
     
     @property
     def sumula(self):
@@ -102,17 +115,16 @@ class Partida:
         """
         for tupla in relatorio_jog_gols:
             txt = f"""
-            Gol marcado por {tupla[0].nome} a favor de {tupla[0].time} aos {tupla[1]}'
+            Gol marcado por {tupla[0].nome} a favor de {tupla[0].time.nome} aos {tupla[1]}'
             """
             sumula += txt
         sumula += """
-        
         Fim da partida."""
         self.__sumula = sumula
         return sumula 
     
     def __str__(self):
         return f"""Partida: id {self.id_}: 
-        {self.time_anfitriao.nome.upper()} {self.placar} {self.time_visitante.nome.upper()}
-        árbitro: {self.arbitro_designado.nome}
-        """
+{self.time_anfitriao.nome.upper()} {self.placar} {self.time_visitante.nome.upper()}
+Árbitro: {self.arbitro_designado.nome}"""
+    
