@@ -129,36 +129,36 @@ class Time:
         if isinstance(gols_sofridos, int):
             self.__gols_sofridos = gols_sofridos
             
-    def adicionar_jogadores(self, jogadores: list):
-        if isinstance(jogadores, list):
-            if (len(jogadores) + len(self.jogadores)) > self.max_jogadores:
-                raise ValueError
-            else:
-                for jogador in jogadores:
-                    if not isinstance(jogador, Jogador):
-                        raise TypeError
-                    else:
-                        self.jogadores.append(jogador)
-                        jogador.time = self
-                        jogador.disponivel = False
-                return True
-        else:
-            raise ListaError()
+    #def adicionar_jogadores(self, jogadores: list):
+       # if isinstance(jogadores, list):
+         #   if (len(jogadores) + len(self.jogadores)) > self.max_jogadores:
+         #       raise ValueError
+         #   else:
+          #      for jogador in jogadores:
+            #        if not isinstance(jogador, Jogador):
+              #          raise TypeError
+              #      else:
+                 #       self.jogadores.append(jogador)
+                 #       jogador.time = self
+                 #       jogador.disponivel = False
+             #   return True
+       # else:
+          #  raise ListaError()
                     
-    def remover_jogadores(self, jogadores: list):
-        if isinstance(jogadores, list):
-            for jogador in jogadores:
-                if not isinstance(jogador, Jogador):
-                    raise TypeError
-                elif jogador not in self.jogadores:
-                    raise ValueError
-                else:
-                    jogador.time = None
-                    jogador.disponivel = True
-                    self.jogadores.remove(jogador)
-            return True
-        else:
-            raise ListaError()
+   # def remover_jogadores(self, jogadores: list):
+      #  if isinstance(jogadores, list):
+       #     for jogador in jogadores:
+         #       if not isinstance(jogador, Jogador):
+         #          raise TypeError
+          #      elif jogador not in self.jogadores:
+           #         raise ValueError
+           #    else:
+             #       jogador.time = None
+             #       jogador.disponivel = True
+             #      self.jogadores.remove(jogador)
+        #    return True
+      #  else:
+        #   raise ListaError()
     
     def __str__(self):
         if self.tecnico:

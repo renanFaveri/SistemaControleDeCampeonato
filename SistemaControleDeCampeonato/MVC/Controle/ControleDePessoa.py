@@ -19,7 +19,7 @@ from MVC.entidade.jogador import Jogador
 from MVC.limite.tela import Tela
 from MVC.limite.telaDePessoa import TelaDePessoas
 from MVC.exceptionLista import ListaError
-
+from MVC.entidade.jogadorDao import JogadorDAO
 
 
 class ControladorDePessoas(ControladorDeEntidade):
@@ -29,10 +29,7 @@ class ControladorDePessoas(ControladorDeEntidade):
         self.__posicoes = {1: Goleiro(), 2: Defensor(), 3: MeioCampista(), 4: Atacante()}
         self.__mentalidades = {1: Defensiva(), 2: Moderada(), 3: Ofensiva()}
         self.__rigidez = {1: Brando(), 2: Moderado(), 3: Severo()}
-        self.__jogadores_registrados = [Jogador('Jogador Um', self.__posicoes[1]), Jogador('Jogador Dois', self.__posicoes[4]), Jogador('Jogador Tres', self.__posicoes[1]), 
-                Jogador('Jogador Quatro', self.__posicoes[4]), Jogador('Jogador Cinco', self.__posicoes[1]), Jogador('Jogador Seis', self.__posicoes[4]), Jogador('Jogador Sete', self.__posicoes[1]),
-                Jogador('Jogador Oito', self.__posicoes[4]), Jogador('Jogador Nove', self.__posicoes[2]), Jogador('Jogador Dez', self.__posicoes[3]), Jogador('Jogador Onze', self.__posicoes[2]),
-                Jogador('Jogador Doze', self.__posicoes[3]), Jogador('Jogador Treze', self.__posicoes[4])]
+        self.__jogador_DAO = JogadorDAO()
         self.__tecnicos_registrados = []
         self.__arbitros_registrados = [Arbitro('Margarida', self.__rigidez[3])]
         self.__tela = TelaDePessoas(self)
@@ -52,8 +49,8 @@ class ControladorDePessoas(ControladorDeEntidade):
         return self.__tecnicos_registrados
     
     @property
-    def jogadores_registrados(self):
-        return self.__jogadores_registrados
+    def jogador_DAO(self):
+        return self.__jogador_DAO
     
     @property
     def arbitros_registrados(self):
@@ -77,15 +74,17 @@ class ControladorDePessoas(ControladorDeEntidade):
         menu = ['1 - Goleiro', '2 - Defensor','3 - Meio campista', '4 - Atacante']
         opcao = self.tela.exibir_menu(menu, range(1,5))
         posicao = self.__posicoes[opcao]
+        print (posicao)
         try:
             jogador = Jogador(nome_jogador, posicao)
             contador = 0
-            while contador < len(self.__jogadores_registrados):
-                if jogador.nome ==  self.__jogadores_registrados[contador].nome and jogador.posicao == self.__jogadores_registrados[contador].posicao:
+            lista_dao = self.__jogador_DAO.cache
+            while contador < len(lista_dao):
+                if jogador.nome == lista_dao[contador].nome and jogador.posicao == lista_dao[contador].posicao:
                         raise ValueError
                 else:
                     contador += 1
-            self.__jogadores_registrados.append(jogador)
+            self.__jogador_DAO.add(jogador)
             self.mostrar_informacoes(jogador)
         except TypeError:
             self.tela.mostrar_mensagem('»»»» Não foi informada a posição do jogador.')
@@ -167,7 +166,7 @@ class ControladorDePessoas(ControladorDeEntidade):
         posicao = self.tela.recebe_int('Procurar jogador por posição: 1 - Goleiro, 2 - Defensor, 3 - Meio campista, 4 - Atacante',
                                        range(1,5))
         encontrados = []
-        for obj in self.__jogadores_registrados:
+        for obj in self.__jogador_DAO:
             if obj.posicao == self.__posicoes[posicao]:
                 encontrados.append(obj)
         for pessoa in encontrados:
@@ -195,9 +194,9 @@ class ControladorDePessoas(ControladorDeEntidade):
     
     def buscar_jogador(self, metodo):
         if metodo == 1:
-            return self.buscar_nome(self.__jogadores_registrados)
+            return self.buscar_nome(self.__jogador_DAO.cache)
         elif metodo == 2:
-            return self.buscar_id(self.__jogadores_registrados)
+            return self.buscar_id(self.__jogador_DAO.cache)
         elif metodo == 3:
             return self.buscar_posicao()
             
@@ -279,8 +278,8 @@ class ControladorDePessoas(ControladorDeEntidade):
                     if opcao == 1:
                             nome_jogador = self.tela.recebe_str('Informe o nome do jogador: ', 3)
                             contador = 0
-                            while contador < len(self.__jogadores_registrados):
-                                if nome_jogador ==  self.__jogadores_registrados[contador].nome and jogador.posicao == self.__jogadores_registrados[contador].posicao:
+                            while contador < len(self.__jogador_DAO):
+                                if nome_jogador ==  self.__jogador_DAO[contador].nome and jogador.posicao == self.__jogador_DAO[contador].posicao:
                                     raise ValueError
                                 else:
                                     contador += 1
@@ -290,8 +289,8 @@ class ControladorDePessoas(ControladorDeEntidade):
                             opcao = self.tela.exibir_menu(menu, range(1,5))
                             posicao = self.__posicoes[opcao]
                             contador = 0
-                            while contador < len(self.__jogadores_registrados):
-                                if jogador.nome ==  self.__jogadores_registrados[contador].nome and posicao == self.__jogadores_registrados[contador].posicao:
+                            while contador < len(self.__jogador_DAO):
+                                if jogador.nome ==  self.__jogador_DAO[contador].nome and posicao == self.__jogador_DAO[contador].posicao:
                                     raise ValueError
                                 else:
                                     contador += 1
@@ -420,7 +419,7 @@ class ControladorDePessoas(ControladorDeEntidade):
     
     def listar_jogadores(self, n_entradas = None):
         jogadores = []
-        lista = self.__jogadores_registrados
+        lista = self.__jogador_DAO
         if n_entradas is None:
             menu = ['1 - Listar todos os jogadores cadastrados', '2 - Listar número determinado de jogadores']
             opcao = self.tela.exibir_menu(menu, range(1,3))
@@ -508,8 +507,8 @@ class ControladorDePessoas(ControladorDeEntidade):
         opcao = self.tela.exibir_menu(menu, range(1,3))
         jogador = self.buscar_jogador(opcao)
         if jogador:
-            self.__jogadores_registrados.remove(jogador)
-            if jogador not in self.__jogadores_registrados:
+            self.__jogador_DAO.remove(jogador)
+            if jogador not in self.__jogador_DAO:
                 self.tela.mostrar_mensagem('Jogador excluído com sucesso.')
             else:
                 self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')

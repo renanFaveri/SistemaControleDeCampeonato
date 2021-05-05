@@ -11,8 +11,6 @@ class ControladorDeTimes(ControladorDeEntidade):
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
         self.__times_registrados = [Time('Man Utd', 'red', 'white'), Time('Man City', 'light blue', 'white')]
-        self.__times_registrados[0].adicionar_jogadores(self.__controlador_master.cp.jogadores_registrados[0:2])
-        self.__times_registrados[1].adicionar_jogadores(self.__controlador_master.cp.jogadores_registrados[2:])
         self.__tela = TelaDeTimes(self)
         
     @property
@@ -116,7 +114,7 @@ class ControladorDeTimes(ControladorDeEntidade):
         botao, valores = self.tela.abreTela()
         if botao == 'Confirmar':
             negociados = valores['box_goleiros'] + valores['box_defensores'] + valores['box_meio_campistas'] + valores['box_atacantes']
-            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, jogador) for jogador in negociados]
+            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogador_DAO, jogador) for jogador in negociados]
             botao = self.tela.popup_confirmar_compra(jogadores)
             if botao == 'Confirmar':
                 time.adicionar_jogadores(jogadores)
@@ -127,7 +125,7 @@ class ControladorDeTimes(ControladorDeEntidade):
         self.tela.tela_vender_jogador(time)
         botao, valores = self.tela.abreTela()
         if botao == 'Confirmar':
-            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, jogador) for jogador in valores['lstbox']]
+            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogador_DAO, jogador) for jogador in valores['lstbox']]
             botao = self.tela.popup_confirmar_venda(jogadores)
             if botao == 'Confirmar':
                 time.remover_jogadores(jogadores)

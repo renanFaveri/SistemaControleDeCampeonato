@@ -3,9 +3,6 @@ from .tela import Tela
 from MVC.entidade.partida import Partida
 from MVC.entidade.campeonato import Campeonato
 
-
-
-
 class TelaDePartidas:
     
     def __init__(self, controlador_de_tela):

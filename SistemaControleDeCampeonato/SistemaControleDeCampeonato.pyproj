@@ -42,6 +42,9 @@
     <Compile Include="MVC\entidade\brando.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\entidade\dao.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\defensiva.py">
       <SubType>Code</SubType>
     </Compile>
@@ -49,6 +52,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\defensor.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\jogadorDao.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\meioCampo.py">
