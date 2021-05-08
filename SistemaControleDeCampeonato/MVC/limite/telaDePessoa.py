@@ -1,6 +1,6 @@
-from .tela import Tela
+import PySimpleGUI as sgui
 
-class TelaDePessoas(Tela):
+class TelaDePessoas:
     
     def __init__(self, controlador):
         self.__controlador: controlador

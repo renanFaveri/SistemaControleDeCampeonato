@@ -1,3 +1,5 @@
+from MVC.exceptionCapacidadeMax import CapacidadeMaximaError
+
 class CampeonatoCompletoError(CapacidadeMaximaError):
 
     def __init__(self):
