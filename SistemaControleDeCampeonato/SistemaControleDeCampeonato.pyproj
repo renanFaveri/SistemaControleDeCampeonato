@@ -39,6 +39,9 @@
     <Compile Include="MVC\Controle\controleJogarCampeonato.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\entidade\arbitroDao.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\entidade\brando.py">
       <SubType>Code</SubType>
     </Compile>
@@ -103,6 +106,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\severo.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\entidade\tecnicoDao.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\entidade\time.py">
