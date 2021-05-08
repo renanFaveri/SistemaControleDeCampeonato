@@ -1,4 +1,5 @@
 from MVC.exceptionLista import ListaError
+from MVC.exceptionVazia import EntradaVaziaError
 from .jogador import Jogador
 from .tecnico import Tecnico
 
@@ -20,8 +21,13 @@ class Time:
         self.__derrotas = 0
         self.__gols_marcados = 0
         self.__gols_sofridos = 0
-    
 
+
+    def dict_dados(self):
+        return {'id': self.__id, 'nome': self.__nome, 'cor_p': self.__cor_primaria, 'cor_s': self.__cor_secundaria, 'classificacao': self.__classificacao, 
+                    'jogadores': [(jogador.nome, jogador.posicao.posicao, jogador.gols_marcados) for jogador in self.__jogadores], 'tecnico': self.__tecnico.nome if self.__tecnico != None else '', 
+                    'vitorias': self.__vitorias, 'empates': self.__empates, 'derrotas': self.__derrotas, 'gols_m': self.__gols_marcados, 'gols_s': self.__gols_sofridos}
+    
     @property
     def id_(self):
         return self.__id   
@@ -33,7 +39,12 @@ class Time:
     @nome.setter
     def nome(self, nome):
         if isinstance(nome, str):
-            self.__nome = nome
+            if len(nome) > 0:
+                self.__nome = nome
+            else:
+                raise EntradaVaziaError()
+        else:
+            raise TypeError()
     
     @property
     def cor_primaria(self):
@@ -77,8 +88,7 @@ class Time:
     @property
     def tecnico(self):
         return self.__tecnico
-        
-
+    
     @tecnico.setter
     def tecnico(self, tecnico: Tecnico):
         if isinstance(tecnico, Tecnico):
@@ -129,40 +139,41 @@ class Time:
         if isinstance(gols_sofridos, int):
             self.__gols_sofridos = gols_sofridos
             
-    #def adicionar_jogadores(self, jogadores: list):
-       # if isinstance(jogadores, list):
-         #   if (len(jogadores) + len(self.jogadores)) > self.max_jogadores:
-         #       raise ValueError
-         #   else:
-          #      for jogador in jogadores:
-            #        if not isinstance(jogador, Jogador):
-              #          raise TypeError
-              #      else:
-                 #       self.jogadores.append(jogador)
-                 #       jogador.time = self
-                 #       jogador.disponivel = False
-             #   return True
-       # else:
-          #  raise ListaError()
+    def adicionar_jogadores(self, jogadores: list):
+        if isinstance(jogadores, list):
+            if (len(jogadores) + len(self.jogadores)) > self.max_jogadores:
+                raise ValueError
+            else:
+                for jogador in jogadores:
+                    if not isinstance(jogador, Jogador):
+                        raise TypeError
+                    else:
+                        self.jogadores.append(jogador)
+                        jogador.time = self
+                        jogador.disponivel = False
+                return True
+        else:
+            raise ListaError()
                     
-   # def remover_jogadores(self, jogadores: list):
-      #  if isinstance(jogadores, list):
-       #     for jogador in jogadores:
-         #       if not isinstance(jogador, Jogador):
-         #          raise TypeError
-          #      elif jogador not in self.jogadores:
-           #         raise ValueError
-           #    else:
-             #       jogador.time = None
-             #       jogador.disponivel = True
-             #      self.jogadores.remove(jogador)
-        #    return True
-      #  else:
-        #   raise ListaError()
+    def remover_jogadores(self, jogadores: list):
+        if isinstance(jogadores, list):
+            for jogador in jogadores:
+                if not isinstance(jogador, Jogador):
+                    raise TypeError
+                elif jogador not in self.jogadores:
+                    raise ValueError
+                else:
+                    jogador.time = None
+                    jogador.disponivel = True
+                    self.jogadores.remove(jogador)
+            return True
+        else:
+            raise ListaError()
     
     def __str__(self):
         if self.tecnico:
             return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico.nome}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
         else:
             return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
+
         

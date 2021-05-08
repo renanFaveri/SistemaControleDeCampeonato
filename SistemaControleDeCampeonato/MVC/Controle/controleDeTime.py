@@ -1,17 +1,25 @@
+import PySimpleGUI as sgui
 from .controleDeEntidade import ControladorDeEntidade
-from MVC.entidade.time import Time
-from MVC.exceptionLista import ListaError
 from MVC.limite.telaDeTime import TelaDeTimes
 from MVC.limite.tela import Tela
+from MVC.entidade.time import Time
+from MVC.entidade.timeDao import TimeDAO
 from MVC.entidade.tecnico import Tecnico
 from MVC.entidade.jogador import Jogador
+from MVC.exceptionLista import ListaError
+from MVC.exceptionVazia import EntradaVaziaError
+
 
 class ControladorDeTimes(ControladorDeEntidade):
 
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
-        self.__times_registrados = [Time('Man Utd', 'red', 'white'), Time('Man City', 'light blue', 'white')]
+        self.__time_DAO = TimeDAO()
         self.__tela = TelaDeTimes(self)
+
+    @property
+    def time_DAO(self):
+        return self.__time_DAO.cache
         
     @property
     def cm(self):
@@ -26,34 +34,19 @@ class ControladorDeTimes(ControladorDeEntidade):
         if isinstance(tela, Tela):
             self.__tela = tela
             
-    @property
-    def times_registrados(self):
-        return self.__times_registrados
+    def listar_nomes_times(self):
+        return [time.nome for time in self.__time_DAO.cache]
                     
-            
     def buscar_nome(self, nome = None):
-        if nome is None:
-            pass
-            # nome = self.tela.recebe_str('Procurar time por nome: ')
-        for obj in self.times_registrados:
+        for obj in self.__time_DAO.cache:
             if obj.nome.lower() == nome.lower():
                 return obj
-
-
-    def buscar_id(self):
-        id_ = self.tela.recebe_int('Procurar time por ID: ')
-        contador = 0
-        while contador < len(self.times_registrados):
-            if id_ == self.times_registrados[contador].id_:
-                self.mostrar_informacoes(self.times_registrados[contador])
-                return self.times_registrados[contador]
-            else:
-                contador += 1
 
     def buscar(self):
         buscando = True
         while buscando:
-            self.tela.menu_buscar_times()
+            lista_nome_times = self.listar_nomes_times()
+            self.tela.menu_buscar_times(lista_nome_times)
             botao, valores = self.tela.abreTela()
             try:
                 if botao == 'Confirmar':
@@ -76,7 +69,6 @@ class ControladorDeTimes(ControladorDeEntidade):
             finally:
                 self.tela.fechaTela()            
 
-
     def cadastrar(self):
         cadastrando = True
         while cadastrando:
@@ -90,11 +82,10 @@ class ControladorDeTimes(ControladorDeEntidade):
                     if 'None' in (nome_time, cor_primaria, cor_secundaria) or\
                                 '' in (nome_time, cor_primaria, cor_secundaria) or\
                                 self.buscar_nome(nome_time):
-                        raise ValueError
+                        raise ValueError()
                     else:
                         time = Time(nome_time, cor_primaria, cor_secundaria)
-                        self.__times_registrados.append(time)
-                        self.tela.fechaTela()
+                        self.__time_DAO.add(time)
                         break
                 except ValueError:
                     self.tela.popup_msg_erro_cadastro()
@@ -108,95 +99,100 @@ class ControladorDeTimes(ControladorDeEntidade):
                 self.tela.fechaTela()
                 break
 
-    
     def contratar(self, time):
-        self.tela.tela_contratar_jogador(time)
-        botao, valores = self.tela.abreTela()
-        if botao == 'Confirmar':
-            negociados = valores['box_goleiros'] + valores['box_defensores'] + valores['box_meio_campistas'] + valores['box_atacantes']
-            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogador_DAO, jogador) for jogador in negociados]
-            botao = self.tela.popup_confirmar_compra(jogadores)
-            if botao == 'Confirmar':
-                time.adicionar_jogadores(jogadores)
-        self.tela.fechaTela()
-        return 
+        g, d, m , a = self.cm.cp.listar_gdma_disponiveis()
+        goleiros = [goleiro for goleiro in g]
+        defensores = [defensor for defensor in d]
+        meio_campistas = [meio_campista for meio_campista in m]
+        atacantes = [atacante for atacante in a]
+        while True:
+            self.tela.tela_contratar_jogador(goleiros, defensores, meio_campistas, atacantes)
+            botao, valores = self.tela.abreTela()
+            try:
+                if botao == 'Confirmar':
+                    negociados = valores['box_goleiros'] + valores['box_defensores'] + valores['box_meio_campistas'] + valores['box_atacantes']
+                    jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, jogador) for jogador in negociados]
+                    botao = self.tela.popup_confirmar_compra(len(jogadores))
+                    if botao == 'Confirmar':
+                        time.adicionar_jogadores(jogadores)
+                        return
+                else:
+                    break
+            except ValueError:
+                self.tela.popup_msg_erro_cadastro()
+            finally:
+                self.tela.fechaTela()
+             
 
     def vender(self, time):
-        self.tela.tela_vender_jogador(time)
+        lista_jogadores = [jogador.nome for jogador in time.jogadores]
+        self.tela.tela_vender_jogador(lista_jogadores)
         botao, valores = self.tela.abreTela()
         if botao == 'Confirmar':
-            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogador_DAO, jogador) for jogador in valores['lstbox']]
-            botao = self.tela.popup_confirmar_venda(jogadores)
+            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, jogador) for jogador in valores['lstbox']]
+            botao = self.tela.popup_confirmar_venda(len(jogadores))
             if botao == 'Confirmar':
                 time.remover_jogadores(jogadores)
         self.tela.fechaTela()
         return 
 
-     
     def alterar(self, time):
         while True:
-            self.tela.janela_time(time)
+            self.tela.janela_time(time.dict_dados())
             botao, valores = self.tela.abreTela()
             janela_aux = self.tela.janela
-            if botao == 'excluir':
-                excluiu = self.excluir(time)
-                self.tela.fechaTela()
-                if excluiu:
-                    break 
-            elif botao == 'Vender':
-                self.vender(time)
-                self.tela.janela = janela_aux
-                self.tela.fechaTela()
-            elif botao == 'Contratar':
-                self.contratar(time)
-                self.tela.janela = janela_aux
-                self.tela.fechaTela()
-            elif botao == 'Confirmar':
-                alterou = False
-                if valores['cor1'] != time.cor_primaria or valores['cor2'] != time.cor_secundaria or valores['time_nome'] != time.nome:
-                    alterou = True
-                if alterou:
-                    botao = self.tela.popup_confirmar_alteracao()
-                    if botao == 'Confirmar':
-                        time.nome = valores['time_nome'].title()
-                        time.cor_secundaria = valores['cor2']
-                        time.cor_primaria = valores['cor1']
-                self.tela.fechaTela()
-            else:
-                self.tela.janela = janela_aux
-                self.tela.fechaTela()
-                break
-        return self.lista()
-            
-
-    def listar(self, n_entradas = None):
-        while True:
-            self.tela.listar_times()
-            botao, valores = self.tela.abreTela()
-            time = botao
-            self.tela.fechaTela()
             try:
-                if time in self.times_registrados:
-                    return self.alterar(time)
+                if botao == 'excluir':
+                    excluiu = self.excluir(time)
+                    self.__time_DAO.remove(time)
+                    if excluiu:
+                        break 
+                elif botao == 'vender':
+                    self.vender(time)
+                    self.tela.janela = janela_aux
+                elif botao == 'contratar':
+                    self.contratar(time)
+                    self.tela.janela = janela_aux
+                elif botao == 'Confirmar':
+                    alterou = False
+                    if valores['cor1'] != time.cor_primaria or valores['cor2'] != time.cor_secundaria or valores['time_nome'] != time.nome:
+                        alterou = True
+                    if alterou:
+                        botao = self.tela.popup_confirmar_alteracao()
+                        if botao == 'Confirmar':
+                            time.nome = self.tela.strip_str(valores['time_nome'].title())
+                            time.cor_secundaria = valores['cor2']
+                            time.cor_primaria = valores['cor1']
+                            self.__time_DAO.atualizar(time)
                 else:
                     break
-            except:
-                pass
+            except ValueError:
+                self.tela.popup_msg_erro_cadastro()
+            except TypeError:
+                self.tela.popup_msg_erro_cadastro()
+            except EntradaVaziaError:
+                self.tela.popup_msg_erro_cadastro()
+            finally:
+                self.tela.fechaTela()
+        return self.listar()
+            
+    def listar(self, n_entradas = None):
+        lista_nome_legenda_times = sorted([(time.nome, f'{time}') for time in self.__time_DAO.cache], key= lambda tupla: tupla[0])
+        self.tela.listar_times(lista_nome_legenda_times)
+        botao, valores = self.tela.abreTela()
+        self.tela.fechaTela()
+        if not(botao == sgui.WIN_CLOSED or botao == 'Voltar'):
+            nome_time = botao
+            time = self.buscar_nome(nome_time)
+            return self.alterar(time)
 
-     
     def excluir(self, time):
         botao = self.tela.popup_msg_excluir()
         if botao == 'Confirmar':
-            i = self.times_registrados.index(time)
+            i = self.__time_DAO.get(time)
             time.remover_jogadores(time.jogadores.copy())
-            self.times_registrados.pop(i)
+            return self.__time_DAO.remove(i)
      
-    
-    def mostrar_informacoes(self, time):
-        self.tela.mostrar_mensagem('')
-        self.tela.mostrar_mensagem('> ')
-        self.tela.mostrar_mensagem(time)
-        
     def abre_tela(self):
         tela = True
         while tela:
@@ -210,5 +206,4 @@ class ControladorDeTimes(ControladorDeEntidade):
                         opcoes[key]()
             else:
                 tela = False
-
 
