@@ -1,23 +1,38 @@
 from .time import Time
 from .arbitro import Arbitro
-#from MVC.exceptionVazia import EntradaVaziaError
-#from MVC.exceptionTime import TimeIncompletoError
+
+
 
 class Partida:
     
-    def __init__(self, time_anfitriao, time_visitante, arbitro_designado, data_do_jogo = None, sumula = None):
+    def __init__(self, time_anfitriao, time_visitante, arbitro_designado, sumula = None):
         self.__id = id(self)
         self.__time_anfitriao = time_anfitriao
         self.__time_visitante = time_visitante
         self.__arbitro_designado = arbitro_designado
-        self.__data_do_jogo = data_do_jogo
         self.__jogada = False
         self.__sumula = sumula
         self.__placar = None
         self.__relatorio = None
-        self.__tela_final = None
 
-        
+    
+    def dict_dados(self):
+        return {'id': self.__id, 'ta': self.__time_anfitriao.nome, 'tv': self.__time_visitante.nome, 'arb': self.__arbitro_designado.nome, 'jogada': self.__jogada, 'sumula': self.__sumula,
+                    'placar': self.placar, 'relatorio': self.__relatorio, 'txt_relatorio': self.txt_relatorio() if self.__relatorio != None else ''}
+
+
+    def txt_relatorio(self):
+        relatorio_anf = [tupla for tupla in self.__relatorio if tupla[0].time is self.__time_anfitriao]
+        text_anf = ""
+        for tupla in relatorio_anf:
+            text_anf += f"{tupla[0].nome} - gol aos {tupla[1]}'\n"
+        relatorio_vis = [tupla for tupla in self.__relatorio if tupla[0].time is self.__time_visitante]
+        text_vis = ""
+        for tupla in relatorio_vis:
+            text_vis += f"{tupla[0].nome} - gol aos {tupla[1]}'\n"
+        return text_anf, text_vis
+
+
     @property
     def id_(self):
         return self.__id
@@ -70,14 +85,6 @@ class Partida:
             raise TypeError
      
     @property
-    def data_do_jogo(self):
-        return self.__data_do_jogo
-    
-    @data_do_jogo.setter
-    def data_do_jogo(self, data_do_jogo):
-        self.__data_do_jogo = data_do_jogo
-        
-    @property
     def jogada(self):
         return self.__jogada
     
@@ -94,16 +101,6 @@ class Partida:
     def relatorio(self, relatorio):
         if isinstance(relatorio, list):
             self.__relatorio = relatorio
-
-    @property
-    def tela_final(self):
-        return self.__tela_final
-
-    @tela_final.setter
-    def tela_final(self, tela_final):
-        from MVC.limite.telaDePartidas import TelaDePartidas
-        if isinstance(tela_final, TelaDePartidas):
-            self.__tela_final = tela_final
     
     @property
     def sumula(self):
@@ -128,4 +125,4 @@ class Partida:
         return f"""Partida: id {self.id_}: 
 {self.time_anfitriao.nome.upper()} {self.placar} {self.time_visitante.nome.upper()}
 Árbitro: {self.arbitro_designado.nome}"""
-        
+            

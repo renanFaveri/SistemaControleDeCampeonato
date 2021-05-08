@@ -1,17 +1,14 @@
 from .time import Time
-from .calendario import Calendario
 from MVC.exceptionLista import ListaError
 
-
 class Campeonato:
-    
-    def __init__(self, nome, n_times: int, times: list = [], calendario: Calendario = None):
+
+    def __init__(self, nome, n_times: int, times: list = []):
         self.__id = id(self)
         self.__nome = nome
         self.__n_times = n_times
         self.__times = times
         self.__partidas = []
-        self.__calendario = calendario
         self.__estatatisticas = None
 
     @property
@@ -40,28 +37,18 @@ class Campeonato:
                 raise ValueError
 
     @property
-    def calendario(self):
-        return self.__calendario
-    
-    @calendario.setter
-    def calendario(self, calendario):
-        if isinstance(calendario, Calendario):
-            self.__calendario = calendario
-
-    @property
     def times(self):
         return self.__times
     
     def adicionar_times(self, times: list):
         if isinstance(times, list):
-            for time in times:
+            if (len(times) + len(self.times)) > self.n_times:
+                    raise ValueError
+            for time in times:                
                 if not isinstance(time, Time):
                     raise TypeError
-            if (len(times) + len(self.times)) > self.n_times:
-                raise ValueError
-            else:
-                self.times.extend(times)
-                return True
+            self.times.extend(times)
+            return True
         else:
             raise ListaError()
 
@@ -74,7 +61,7 @@ class Campeonato:
                     raise ValueError
                 else:
                     self.times.remove(time)
-                    return True
+            return True
         else:
             raise ListaError()
 
@@ -85,9 +72,15 @@ class Campeonato:
     @property
     def estatisticas(self):
         return self.__estatisticas
+
+    def gerar_estatisticas(self):
+        tabela = """Posição\tTime\t\tPontos | Vitórias | Empates | Derrotas\n"""
+        for time in self.times:
+            tabela += f"""      {self.times.index(time)+1}\t{time.nome}\t\t{' '*5}{(time.vitorias*3)+(time.empates*1)}{('|'.center(13,' '))}{time.vitorias}\
+{('|'.center(16,' '))}{time.empates}{('|'.center(17,' '))}{time.derrotas}\n"""
+        self.__estatisticas = tabela
+        return self.__estatisticas
     
     def __str__(self):
         return f'Nome: {self.nome}; ID: {self.id_}; Número de times competidores: {len(self.times)}; Capacidade do campeonato: {self.n_times} times'
-
-
     

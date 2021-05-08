@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from MVC.exceptionCaracter import CaracterEspecialError
 
- 
 class Tela(ABC):
     
     @abstractmethod
@@ -48,7 +47,7 @@ class Tela(ABC):
                 resposta = aux.strip().title()
                 for char in resposta.upper():
                     if not (65 <= ord(char) <= 90 or ord(char) == 32):
-                        raise CaracterEspecialError
+                        raise CaracterEspecialError()
                 if tamanho_valido and len(resposta) < tamanho_valido:
                         raise ValueError
                 print('Entrada:', resposta)

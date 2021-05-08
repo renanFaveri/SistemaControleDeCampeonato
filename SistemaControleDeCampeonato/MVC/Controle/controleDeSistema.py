@@ -1,9 +1,10 @@
 from .ControleDePessoa import ControladorDePessoas
 from .controleDeTime import ControladorDeTimes
 from .controleDeCampeonato import ControladorDeCampeonatos
+from .controleJogarCampeonato import JogarCampeonato
 from MVC.limite.telaInicial import TelaInicial
 from MVC.limite.tela import Tela
-from .controleJogarCampeonato import JogarCampeonato
+
 
 class ControladorDeSistemas():
     
@@ -50,5 +51,4 @@ class ControladorDeSistemas():
     @property
     def jc(self):
         return self.__jogar_campeonato
-        
-    
+           
