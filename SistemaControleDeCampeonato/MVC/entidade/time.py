@@ -24,10 +24,11 @@ class Time:
 
 
     def dict_dados(self):
-        return {'id': self.__id, 'nome': self.__nome, 'cor_p': self.__cor_primaria, 'cor_s': self.__cor_secundaria, 'classificacao': self.__classificacao, 
-                    'jogadores': [(jogador.nome, jogador.posicao.posicao, jogador.gols_marcados) for jogador in self.__jogadores], 'tecnico': self.__tecnico.nome if self.__tecnico != None else '', 
-                    'vitorias': self.__vitorias, 'empates': self.__empates, 'derrotas': self.__derrotas, 'gols_m': self.__gols_marcados, 'gols_s': self.__gols_sofridos}
-    
+        return {'id': self.__id, 'nome': self.__nome, 'cor_p': self.__cor_primaria, 'cor_s': self.__cor_secundaria,
+                    'jogadores': [(jogador.nome, jogador.posicao.posicao, jogador.gols_marcados) for jogador in self.__jogadores], 
+                    'tecnico': self.__tecnico.nome if self.__tecnico != None else '', 'vitorias': self.__vitorias, 'empates': self.__empates, 
+                    'derrotas': self.__derrotas, 'gols_m': self.__gols_marcados, 'gols_s': self.__gols_sofridos}
+
     @property
     def id_(self):
         return self.__id   
@@ -63,15 +64,6 @@ class Time:
     def cor_secundaria(self, cor):
         if isinstance(cor, str):
             self.__cor_secundaria = cor
-
-    @property
-    def classificacao(self):
-        return self.__classificacao
-    
-    @classificacao.setter
-    def classificacao(self, classificacao):
-        if isinstance(classificacao, int):
-            self.__classificacao = classificacao
     
     @property
     def jogadores(self):
@@ -87,11 +79,14 @@ class Time:
     
     @property
     def tecnico(self):
-        return self.__tecnico
+        if self.__tecnico == None:
+            return ''
+        else:
+            return self.__tecnico
     
     @tecnico.setter
     def tecnico(self, tecnico: Tecnico):
-        if isinstance(tecnico, Tecnico):
+        if isinstance(tecnico, Tecnico) or tecnico == None:
             self.__tecnico = tecnico
             
     @property
@@ -143,12 +138,14 @@ class Time:
         if isinstance(jogadores, list):
             if (len(jogadores) + len(self.jogadores)) > self.max_jogadores:
                 raise ValueError
+            elif len(jogadores) == 0:
+                raise EntradaVaziaError()
             else:
                 for jogador in jogadores:
                     if not isinstance(jogador, Jogador):
                         raise TypeError
                     else:
-                        self.jogadores.append(jogador)
+                        self.__jogadores.append(jogador)
                         jogador.time = self
                         jogador.disponivel = False
                 return True
@@ -160,7 +157,7 @@ class Time:
             for jogador in jogadores:
                 if not isinstance(jogador, Jogador):
                     raise TypeError
-                elif jogador not in self.jogadores:
+                elif jogador not in self.__jogadores:
                     raise ValueError
                 else:
                     jogador.time = None
@@ -171,9 +168,10 @@ class Time:
             raise ListaError()
     
     def __str__(self):
-        if self.tecnico:
-            return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico.nome}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
+        if self.__tecnico:
+            return f'Nome: {self.nome}; ID: {self.id_}; Técnico: {self.tecnico.nome}; Número de jogadores no time: {len(self.jogadores)}'
         else:
-            return f'Nome: {self.nome}; ID: {self.id_}; técnico: {self.tecnico}; classificação: {self.classificacao}; Número de jogadores no time: {len(self.jogadores)}'
+            return f'Nome: {self.nome}; ID: {self.id_}; Técnico: sem técnico; Número de jogadores no time: {len(self.jogadores)}'
+
 
         

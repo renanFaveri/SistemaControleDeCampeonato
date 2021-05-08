@@ -41,9 +41,9 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
                 return obj
          
     def buscar(self):
-        buscando = True
-        while buscando:
-            self.tela.menu_buscar_campeonatos()
+        lista_campeonatos = self.listar_nomes_campeonatos()
+        while True:
+            self.tela.menu_buscar_campeonatos(lista_campeonatos)
             botao, valores = self.tela.abreTela()
             try:
                 if botao == 'Confirmar':
@@ -94,34 +94,48 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
                 break
 
     def adicionar_competidores(self, campeonato):
-        # limite n times
-        # levantar e tratar exceções
-        self.tela.tela_adicionar_times(campeonato)
-        botao, valores = self.tela.abreTela()
-        if botao == 'Confirmar':
-            nomes_competidores = valores['competidores']
-            competidores = [self.cm.ct.buscar_nome(time) for time in nomes_competidores]
-            botao = self.tela.popup_confirmar_compra(competidores)
-            if botao == 'Confirmar':
-                campeonato.adicionar_times(competidores)
-        self.tela.fechaTela()
-        return 
+        lista_times = [time.nome for time in self.cm.ct.times_registrados if time not in campeonato.times]
+        while True:
+            self.tela.tela_adicionar_times(lista_times)
+            botao, valores = self.tela.abreTela()
+            try:
+                if botao == 'Confirmar':
+                    nomes_competidores = valores['competidores']
+                    competidores = [self.cm.ct.buscar_nome(time) for time in nomes_competidores]
+                    botao = self.tela.popup_confirmar_adicao(len(competidores))
+                    if botao == 'Confirmar':
+                        campeonato.adicionar_times(competidores)
+                        break
+                else:
+                    break
+            except CampeonatoCompetoError:
+                self.tela.popup_erro_cadastro_cheio()
+            finally:
+                self.tela.fechaTela()
 
     def remover_competidores(self, campeonato):
-        self.tela.tela_remover_times(campeonato)
-        botao, valores = self.tela.abreTela()
-        if botao == 'Confirmar':
-            nomes_competidores = valores['lstbox']
-            competidores = [self.cm.ct.buscar_nome(time) for time in nomes_competidores]
-            botao = self.tela.popup_confirmar_venda(competidores)
+        lista_times = [time.nome for time in campeonato.times]
+        while True:            
+            self.tela.tela_remover_times(lista_times)
+            botao, valores = self.tela.abreTela()
             if botao == 'Confirmar':
-                campeonato.adicionar_times(competidores)
-        self.tela.fechaTela()
-        return 
+                nomes_competidores = valores['lstbox']
+                competidores = [self.cm.ct.buscar_nome(time) for time in nomes_competidores]
+                botao = self.tela.popup_confirmar_remocao(len(competidores))
+                if botao == 'Confirmar':
+                    campeonato.remover_times(competidores)
+                    self.tela.fechaTela()
+                    break
+                else:
+                    self.tela.fechaTela()
+            else:
+                self.tela.fechaTela()
+                break
 
     def alterar(self, campeonato):
         while True:
-            self.tela.janela_campeonato(campeonato)
+            dados_camp = campeonato.dict_dados()
+            self.tela.janela_campeonato(dados_camp)
             botao, valores = self.tela.abreTela()
             janela_aux = self.tela.janela
             try:
@@ -155,21 +169,17 @@ class ControladorDeCampeonatos(ControladorDeEntidade):
             finally:
                 self.tela.fechaTela()
         return self.listar()
-
  
-    def listar(self, n_entradas = None):
-        while True:
-            self.tela.listar_campeonatos()
-            botao, valores = self.tela.abreTela()
-            campeonato = botao
-            self.tela.fechaTela()
-            try:
-                if campeonato in self.campeonatos_registrados:
-                    return self.alterar(campeonato)
-                else:
-                    break
-            except:
-                pass
+    def listar(self):
+        lista_info_campeonatos = sorted([(campeonato.nome, f'{campeonato}') for campeonato in self.campeonatos_registrados], key= lambda tupla: tupla[0])
+        self.tela.listar_campeonatos(lista_info_campeonatos)
+        botao, valores = self.tela.abreTela()
+        self.tela.fechaTela()
+        if not(botao == sgui.WIN_CLOSED or botao == 'Voltar'):
+            campeonato_nome = botao
+            campeonato = self.buscar_nome(campeonato_nome)
+            return self.alterar(campeonato)
+
 
     def excluir(self, campeonato):
         botao = self.tela.popup_msg_excluir()

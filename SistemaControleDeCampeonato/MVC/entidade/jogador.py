@@ -2,11 +2,10 @@ from .pessoa import Pessoa
 from .posicao import Posicao
 
 class Jogador(Pessoa):
-    def __init__(self, nome, posicao: Posicao, funcao = 'Jogador', time = None, gols_marcados = 0, gols_concedidos = 0, disponivel = True):
+    def __init__(self, nome, posicao: Posicao, funcao = 'Jogador', time = None):
         super().__init__(nome, funcao)
-        self.__gols_marcados = gols_marcados
-        self.__gols_concedidos = gols_concedidos
-        self.__disponivel = disponivel
+        self.__gols_marcados = 0
+        self.__gols_concedidos = 0
         self.__time = time
         if isinstance(posicao, Posicao):
             self.__posicao = posicao
@@ -44,28 +43,20 @@ class Jogador(Pessoa):
 
     @property
     def time(self):
-        return self.__time
+        if self.__time == None:
+            return ''
+        else:
+            return self.__time
 
     @time.setter
     def time(self, time):
         from .time import Time
-        if isinstance(time, Time):
+        if isinstance(time, Time) or time == None:
             self.__time = time
-        elif time is None:
-            self.__time = None
-    
-    @property
-    def disponivel(self):
-        return self.__disponivel
-    
-    @disponivel.setter
-    def disponivel(self, disponivel):
-        if isinstance(disponivel, bool):
-            self.__disponivel = disponivel
             
     def __str__(self):
-        if self.time:
+        if self.__time:
             return super().__str__() + f"""; posição: {self.posicao}; time atual: {self.time.nome}; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
         else:
-            return super().__str__() + f"""; posição: {self.posicao}; Disponível: {self.disponivel}; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
+            return super().__str__() + f"""; posição: {self.posicao}; time atual: sem time; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
 

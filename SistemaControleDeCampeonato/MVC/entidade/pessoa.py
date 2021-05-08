@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from MVC.exceptionVazia import EntradaVaziaError
 
 class Pessoa(ABC):
 
@@ -19,7 +20,12 @@ class Pessoa(ABC):
     @nome.setter
     def nome(self, nome):
         if isinstance(nome, str):
-            self.__nome = nome
+            if len(nome) > 0:
+                self.__nome = nome
+            else:
+                raise EntradaVaziaError()
+        else:
+            raise TypeError
     
     @property
     def funcao(self):

@@ -4,9 +4,8 @@ from .mentalidade import Mentalidade
 class Tecnico(Pessoa):
 
     
-    def __init__(self, nome, mentalidade: Mentalidade, funcao = 'Técnico', disponivel = True):
+    def __init__(self, nome, mentalidade: Mentalidade, funcao = 'Técnico'):
         super().__init__(nome, funcao)
-        self.__disponivel = disponivel
         self.__time = None
         if isinstance(mentalidade, Mentalidade):
             self.__mentalidade = mentalidade
@@ -24,27 +23,21 @@ class Tecnico(Pessoa):
     
     @property
     def time(self):
-        return self.__time
+        if self.__time == None:
+            return ''
+        else:
+            return self.__time
 
     @time.setter
     def time(self, time):
         from .time import Time
-        if isinstance(time, Time):
+        if isinstance(time, Time) or time == None:
             self.__time = time
             
-    @property
-    def disponivel(self):
-        return self.__disponivel
-    
-    @disponivel.setter
-    def disponivel(self, disponivel):
-        if isinstance(disponivel, bool):
-            self.__disponivel = disponivel
-            
     def __str__(self):
-        if self.time:
+        if self.__time:
             return super().__str__() + f'; mentalidade: {self.mentalidade}; time atual: {self.time.nome}'
         else:
-            return super().__str__() + f'; mentalidade: {self.mentalidade}; Dosponível: {self.disponivel}'
+            return super().__str__() + f'; mentalidade: {self.mentalidade}; time atual: sem time'
 
            

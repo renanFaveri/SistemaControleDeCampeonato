@@ -99,7 +99,33 @@ class ControladorDeTimes(ControladorDeEntidade):
                 self.tela.fechaTela()
                 break
 
-    def contratar(self, time):
+    def contratar_tecnico(self, time):
+        tecnicos = [tecnico.nome for tecnico in self.cm.cp.tecnicos_registrados if tecnico.time is not time]
+        while True:
+            self.tela.tela_contratar_tecnico(tecnicos)
+            botao, valores = self.tela.abreTela()
+            try:
+                if botao == 'Confirmar':
+                    nome_tecnico = valores['box_tecnicos'][0]
+                    tecnico = self.cm.cp.buscar_nome(self.cm.cp.tecnicos_registrados, nome_tecnico)
+                    botao = self.tela.popup_confirmar_compra(1)
+                    if botao == 'Confirmar':
+                        time.tecnico = tecnico
+                        return
+                else:
+                    break
+            except ValueError:
+                self.tela.popup_msg_erro_cadastro()
+            finally:
+                self.tela.fechaTela()             
+
+    def demitir_tecnico(self, time):
+        botao = self.tela.popup_confirmar_demissao(time.tecnico.nome)
+        if botao == 'Confirmar':
+            time.tecnico.time = None
+            time.tecnico = None
+
+    def contratar_jogador(self, time):
         g, d, m , a = self.cm.cp.listar_gdma_disponiveis()
         goleiros = [goleiro for goleiro in g]
         defensores = [defensor for defensor in d]
@@ -122,14 +148,14 @@ class ControladorDeTimes(ControladorDeEntidade):
                 self.tela.popup_msg_erro_cadastro()
             finally:
                 self.tela.fechaTela()
-             
 
-    def vender(self, time):
-        lista_jogadores = [jogador.nome for jogador in time.jogadores]
+    def vender_jogador(self, time):
+        lista_jogadores = time.dict_dados()['jogadores']
         self.tela.tela_vender_jogador(lista_jogadores)
         botao, valores = self.tela.abreTela()
         if botao == 'Confirmar':
-            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, jogador) for jogador in valores['lstbox']]
+            nomes_jogadores = [nome.split('-')[0] for nome in valores['lstbox']]
+            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, self.tela.strip_str(jogador)) for jogador in nomes_jogadores]
             botao = self.tela.popup_confirmar_venda(len(jogadores))
             if botao == 'Confirmar':
                 time.remover_jogadores(jogadores)
@@ -148,11 +174,16 @@ class ControladorDeTimes(ControladorDeEntidade):
                     if excluiu:
                         break 
                 elif botao == 'vender':
-                    self.vender(time)
+                    self.vender_jogador(time)
                     self.tela.janela = janela_aux
                 elif botao == 'contratar':
-                    self.contratar(time)
+                    self.contratar_jogador(time)
                     self.tela.janela = janela_aux
+                elif botao == 'contratar_tecnico':
+                    self.contratar_tecnico(time)
+                    self.tela.janela = janela_aux
+                elif botao == 'demitir_tecnico':
+                    self.demitir_tecnico(time)
                 elif botao == 'Confirmar':
                     alterou = False
                     if valores['cor1'] != time.cor_primaria or valores['cor2'] != time.cor_secundaria or valores['time_nome'] != time.nome:

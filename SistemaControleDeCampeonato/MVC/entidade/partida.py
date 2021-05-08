@@ -17,9 +17,9 @@ class Partida:
 
     
     def dict_dados(self):
-        return {'id': self.__id, 'ta': self.__time_anfitriao.nome, 'tv': self.__time_visitante.nome, 'arb': self.__arbitro_designado.nome, 'jogada': self.__jogada, 'sumula': self.__sumula,
-                    'placar': self.placar, 'relatorio': self.__relatorio, 'txt_relatorio': self.txt_relatorio() if self.__relatorio != None else ''}
-
+        return {'id': self.__id, 'ta': self.__time_anfitriao.nome, 'tv': self.__time_visitante.nome, 
+                'arb': self.__arbitro_designado.nome, 'jogada': self.__jogada, 'sumula': self.__sumula,
+                'placar': self.placar, 'relatorio': self.__relatorio, 'txt_relatorio': self.txt_relatorio() if self.__relatorio != None else ''}
 
     def txt_relatorio(self):
         relatorio_anf = [tupla for tupla in self.__relatorio if tupla[0].time is self.__time_anfitriao]
@@ -70,7 +70,8 @@ class Partida:
     
     @placar.setter
     def placar(self, placar):
-        self.__placar = placar
+        if isinstance(placar, str):
+            self.__placar = placar
             
     @property
     def arbitro_designado(self):

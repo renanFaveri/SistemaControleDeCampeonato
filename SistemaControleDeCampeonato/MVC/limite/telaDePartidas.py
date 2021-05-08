@@ -191,6 +191,19 @@ class TelaDePartidas:
         window.Close()
         return
 
+    def popup_erro_time_incompleto(self):
+        background = '#20660C'
+        text = '#FAE98E'
+        button_color=('#F3EE44', '#06470F')
+        layout = [[sgui.Text('Os times devem possuir ao menos 1 goleiro e outro jogador para jogarem uma partida.', text_color='#20660C', 
+                        background_color='#F3EE44', font=('Candara', 16, 'bold'), justification='Center')],
+                  [sgui.Text('Escolha novamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'), justification='Center')],
+                  [sgui.Button('OK', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color, pad=(0,20))]]
+        window = sgui.Window('Cartão Amarelo!'.upper(), layout, titlebar_font=('Candara', 14, 'bold'), background_color='#F3EE44', element_justification='Center', force_toplevel=True, keep_on_top=True)
+        botao, valores = window.Read()
+        window.Close()
+        return
+
     def popup_msg_erro_partidas(self):
         background = '#20660C'
         text = '#FAE98E'

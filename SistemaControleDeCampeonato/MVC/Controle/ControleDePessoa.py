@@ -20,6 +20,8 @@ from MVC.entidade.jogadorDao import JogadorDAO
 from MVC.limite.tela import Tela
 from MVC.limite.telaDePessoa import TelaDePessoas
 from MVC.exceptionLista import ListaError
+from MVC.exceptionDadosIndisponivel import DadoIndisponivelError
+from MVC.exceptionVazia import EntradaVaziaError
 
     
 class ControladorDePessoas(ControladorDeEntidade):
@@ -36,40 +38,44 @@ class ControladorDePessoas(ControladorDeEntidade):
         self.__tecnicos_registrados = []
         self.__arbitros_registrados = [Arbitro('Margarida', self.__rigidez[3])]
         self.__tela = TelaDePessoas(self)
-        
+
 
     @property
     def tela(self):
         return self.__tela
-    
+
     @tela.setter
     def tela(self, tela):
         if isinstance(tela, Tela):
             self.__tela = tela
-            
+
     @property
     def tecnicos_registrados(self):
         return self.__tecnicos_registrados
-    
+
     @property
     def jogadores_registrados(self):
         return self.__jogadores_registrados
-    
+
     @property
     def arbitros_registrados(self):
         return self.__arbitros_registrados
-    
+
     @property
     def posicoes(self):
         return self.__posicoes
-    
+
     @property
     def mentalidades(self):
         return self.__mentalidades
-    
+
     @property
     def rigidez(self):
         return self.__rigidez
+
+    def dict_dados(self):
+        return {'posicoes': [self.posicoes[chave].posicao for chave in self.posicoes], 'mentalidades': [self.mentalidades[chave].mentalidade for chave in self.mentalidades],
+                'rigidez': [self.rigidez[chave].rigidez for chave in self.rigidez]}
 
     def listar_nomes_arbitros(self):
         return [arbitro.nome for arbitro in self.__arbitros_registrados]
@@ -86,7 +92,7 @@ class ControladorDePessoas(ControladorDeEntidade):
         m = []
         a = []
         for jogador in self.jogadores_registrados:
-            if not jogador.time:
+            if not jogador.time or jogador.time == '':
                 if jogador.posicao.posicao == 'Goleiro':
                     g.append(jogador.nome)
                 elif jogador.posicao.posicao == 'Defensor':
@@ -101,493 +107,255 @@ class ControladorDePessoas(ControladorDeEntidade):
         a = sorted(a)
         return g,d,m,a
 
-    
-    def cadastrar_jogador(self):
-        nome_jogador = self.tela.recebe_str('Informe o nome do jogador: ', 3)
-        menu = ['1 - Goleiro', '2 - Defensor','3 - Meio campista', '4 - Atacante']
-        opcao = self.tela.exibir_menu(menu, range(1,5))
-        posicao = self.__posicoes[opcao]
-        try:
-            jogador = Jogador(nome_jogador, posicao)
-            contador = 0
-            while contador < len(self.__jogadores_registrados):
-                if jogador.nome ==  self.__jogadores_registrados[contador].nome and jogador.posicao == self.__jogadores_registrados[contador].posicao:
-                        raise ValueError
-                else:
-                    contador += 1
-            self.__jogadores_registrados.append(jogador)
-            self.mostrar_informacoes(jogador)
-        except TypeError:
-            self.tela.mostrar_mensagem('»»»» Não foi informada a posição do jogador.')
+    def pegar_posicao(self, nome_posicao):
+        encontrou = False
+        for i in range(len(self.__posicoes)):
+            if self.__posicoes[i+1].posicao == nome_posicao:
+                encontrou = self.__posicoes[i+1]
+                print(encontrou)
+        if encontrou:
+            return encontrou
+        else:
+            raise EntradaVaziaError()
 
-    def cadastrar_tecnico(self):
-        nome_tecnico = self.tela.recebe_str('Digite o nome do técnico: ', 3)
-        menu = ['1 - Defensiva', '2 - Moderada','3 - Ofensiva']
-        opcao = self.tela.exibir_menu(menu, range(1,4))
-        mentalidade = self.__mentalidades[opcao]
-        try:
-            tecnico = Tecnico(nome_tecnico, mentalidade)
-            contador = 0
-            while contador < len(self.__tecnicos_registrados):
-                if tecnico.nome ==  self.__tecnicos_registrados[contador].nome and tecnico.mentalidade == self.__tecnicos_registrados[contador].mentalidade:
-                    raise ValueError
+    def pegar_mentalidade(self, nome_mentalidade):
+        encontrou = False
+        for i in range(len(self.__mentalidades)):
+            if self.__mentalidades[i+1].mentalidade == nome_mentalidade:
+                encontrou =  self.__mentalidades[i+1]
+        if encontrou:
+            return encontrou
+        else:
+            raise EntradaVaziaError()
+
+    def pegar_rigidez(self, nome_rigidez):
+        encontrou = False
+        for i in range(len(self.__rigidez)):
+            if self.__rigidez[i+1].rigidez == nome_rigidez:
+                encontrou = self.__rigidez[i+1]
+        if encontrou:
+            return encontrou
+        else:
+            raise EntradaVaziaError()
+
+    def cadastrar(self): 
+        while True:
+            self.tela.tela_cadastrar_pessoas(self.dict_dados())
+            botao, valores = self.tela.abreTela()
+            try:
+                if botao == 'Confirmar':
+                    if valores['jogador']:
+                        nome_jogador = self.tela.strip_str(valores['jogador_nome']).title()
+                        str_posicao = valores['posicao']
+                        posicao = self.pegar_posicao(str_posicao)
+                        if nome_jogador in self.listar_nomes_jogadores():
+                            raise DadoIndisponivelError()
+                        if nome_jogador == '' or not posicao:
+                            raise EntradaVaziaError()
+                        jogador = Jogador(nome_jogador, posicao)
+                        botao = self.tela.popup_confirmar_cadastro((jogador.nome, jogador.funcao, jogador.posicao.posicao))
+                        if botao == 'Confirmar':
+                            self.__jogadores_registrados.append(jogador)
+                            self.tela.popup_cadastro_criado()
+                    elif valores['tecnico']:
+                        nome_tecnico = self.tela.strip_str(valores['tecnico_nome']).title()
+                        str_mentalidade = valores['mentalidade']
+                        mentalidade = self.pegar_mentalidade(str_mentalidade)
+                        if nome_tecnico in self.listar_nomes_tecnicos():
+                            raise DadoIndisponivelError()
+                        elif nome_tecnico == '' or not mentalidade:
+                            raise EntradaVaziaError()
+                        tecnico = Tecnico(nome_tecnico, mentalidade)
+                        botao = self.tela.popup_confirmar_cadastro((tecnico.nome, tecnico.funcao, tecnico.mentalidade.mentalidade))
+                        if botao == 'Confirmar':
+                            self.__tecnicos_registrados.append(tecnico)
+                            self.tela.popup_cadastro_criado()
+                    elif valores['arbitro']:
+                        nome_arbitro = self.tela.strip_str(valores['arbitro_nome']).title()
+                        str_rigidez = valores['rigidez']
+                        rigidez = self.pegar_rigidez(str_rigidez)
+                        if nome_arbitro in self.listar_nomes_arbitros():
+                            raise DadoIndisponivelError()
+                        elif nome_arbitro == '' or not rigidez:
+                            raise EntradaVaziaError()
+                        arbitro = Arbitro(nome_arbitro, rigidez)
+                        botao = self.tela.popup_confirmar_cadastro((arbitro.nome, arbitro.funcao, arbitro.rigidez.rigidez))
+                        if botao == 'Confirmar':
+                            self.__arbitros_registrados.append(arbitro)
+                            self.tela.popup_cadastro_criado()
+                    else:
+                        raise EntradaVaziaError()                    
                 else:
-                    contador += 1
-            self.__tecnicos_registrados.append(tecnico)
-            self.mostrar_informacoes(tecnico)
-        except TypeError:
-            self.tela.mostrar_mensagem('»»»» Não foi informada a mentalidade do técnico.')
-        
-        
-    def cadastrar_arbitro(self):
-        nome_arbitro = self.tela.recebe_str('Digite o nome do ábitro: ', 3)
-        menu = ['1 - Brando', '2 - Moderado','3 - Severo']
-        opcao = self.tela.exibir_menu(menu, range(1,4))
-        rigidez = self.__rigidez[opcao]
-        try:
-            arbitro = Arbitro(nome_arbitro, rigidez)
-            contador = 0
-            while contador < len(self.__arbitros_registrados):
-                if arbitro.nome ==  self.__arbitros_registrados[contador].nome and arbitro.rigidez == self.__arbitros_registrados[contador].rigidez:
-                    raise ValueError
-                else:
-                    contador += 1
-            self.__arbitros_registrados.append(arbitro)
-            self.mostrar_informacoes(arbitro)
-        except TypeError:
-            self.tela.mostrar_mensagem('»»»» Não foi informada a rigidez do árbitro.')     
-    
-                
-    def cadastrar(self):
-        cadastrando = True
-        while cadastrando:
-            opcoes = {1: self.cadastrar_jogador, 2: self.cadastrar_tecnico, 3: self.cadastrar_arbitro}
-            menu = ['1 - Cadastrar jogador', '2 - Cadastrar técnico','3 - Cadastrar árbitro', '0 - Voltar ao menu inicial']
-            opcao = self.tela.exibir_menu(menu, range(4))
-            if opcao != 0:
-                try:
-                    opcoes[opcao]()
-                except ValueError:
-                    self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
-                cadastrando = self.tela.recebe_int('Realizar nova operação? [1 - Sim / 0 - Não]: ', [0,1])
-            else:
-                cadastrando = False
-        
+                    return
+            except ValueError:
+                self.tela.popup_msg_erro_cadastro()
+            except DadoIndisponivelError:
+                #fazer popup 'já existe um cadastro com essas informações
+                self.tela.popup_msg_erro_cadastro()
+            except EntradaVaziaError:
+                self.tela.popup_msg_erro_cadastro()
+            finally:
+                self.tela.fechaTela()
+
     def buscar_nome(self, lista = None, nome = None):
-        if nome is None:
-            nome = self.tela.recebe_str('Procurar por nome: ')
         for obj in lista:
             if obj.nome.lower() == nome.lower():
                 return obj
-    
-    def buscar_id(self, lista):
-        id_ = self.tela.recebe_int('Procurar por ID: ')
-        contador = 0
-        while contador < len(lista):
-            if id_ == lista[contador].id_:
-                self.mostrar_informacoes(lista[contador])
-                return lista[contador]
-            else:
-                contador += 1
-                
-    def buscar_posicao(self):
-        posicao = self.tela.recebe_int('Procurar jogador por posição: 1 - Goleiro, 2 - Defensor, 3 - Meio campista, 4 - Atacante',
-                                       range(1,5))
-        encontrados = []
-        for obj in self.__jogadores_registrados:
-            if obj.posicao == self.__posicoes[posicao]:
-                encontrados.append(obj)
-        for pessoa in encontrados:
-            self.mostrar_informacoes(pessoa)
-    
-    def buscar_mentalidade(self):
-        mentalidade = self.tela.recebe_int('Procurar técnico por mentalidade: 1 - Defensiva, 2 - Moderada, 3 - Ofensiva',
-                                       range(1,4))
-        encontrados = []
-        for obj in self.__tecnicos_registrados:
-            if obj.mentalidade == self.__mentalidades[mentalidade]:
-                encontrados.append(obj)
-        for pessoa in encontrados:
-            self.mostrar_informacoes(pessoa)
-    
-    def buscar_rigidez(self):
-        rigidez = self.tela.recebe_int('Procurar técnico por mentalidade: 1 - Brando, 2 - Moderado, 3 - Severo',
-                                       range(1,4))
-        encontrados = []
-        for obj in self.__arbitros_registrados:
-            if obj.rigidez == self.__rigidez[rigidez]:
-                encontrados.append(obj)
-        for pessoa in encontrados:
-            self.mostrar_informacoes(pessoa)
-    
-    def buscar_jogador(self, metodo):
-        if metodo == 1:
-            return self.buscar_nome(self.__jogadores_registrados)
-        elif metodo == 2:
-            return self.buscar_id(self.__jogadores_registrados)
-        elif metodo == 3:
-            return self.buscar_posicao()
-            
-    def buscar_tecnico(self, metodo):
-        if metodo == 1:
-            return self.buscar_nome(self.__tecnicos_registrados)
-        elif metodo == 2:
-            return self.buscar_id(self.__tecnicos_registrados)
-        elif metodo == 3:
-            return self.buscar_mentalidade()
-        
-    def buscar_arbitro(self, metodo):
-        if metodo == 1:
-            return self.buscar_nome(self.__arbitros_registrados)
-        elif metodo == 2:
-            return self.buscar_id(self.__arbitros_registrados)
-        elif metodo == 3:
-            return self.buscar_rigidez()    
-        
-    def buscar(self, lista):
-        if isinstance(lista, list):            
-            buscando = True
-            opcoes = {1: self.buscar_nome, 2: self.buscar_id}
-            while buscando:
-                menu = ['1 - Buscar por nome', '2 - Buscar por ID', '0 - Voltar ao menu inicial']
-                opcao = self.tela.exibir_menu(menu, range(3))
-                if opcao == 0:
-                    buscando = False
-                else:
-                    resultado = opcoes[opcao](lista)
-                    if resultado is None:
-                        self.tela.mostrar_mensagem('Não há pessoa cadastrada com esses dados.')
-                        buscando = self.tela.recebe_int('Procurar outra pessoa? [1 - Sim / 0 - Não]: ', [0,1])
-                    else:
-                        return resultado
-        else:
-            raise ListaError
-                
-             
-    def buscar_pessoas(self):
-        buscando = True
-        while buscando:
-            menu = ['1 - Bucar jogador', '2 - Buscar técnico', '3 - Buscar árbitro', '0 - Voltar ao menu inicial']
-            opcao = self.tela.exibir_menu(menu, range(4))
-            if opcao == 1:
-                menu = ['1 - Bucar por nome', '2 - Buscar por ID', '3 - Buscar por posição']
-                opcao = self.tela.exibir_menu(menu, range(1,4))
-                self.buscar_jogador(opcao)
-            elif opcao == 2:
-                menu = ['1 - Bucar por nome', '2 - Buscar por ID', '3 - Buscar por mentalidade']
-                opcao = self.tela.exibir_menu(menu, range(1,4))
-                self.buscar_tecnico(opcao)
-            elif opcao == 3:
-                menu = ['1 - Bucar por nome', '2 - Buscar por ID', '3 - Buscar por rigidez']
-                opcao = self.tela.exibir_menu(menu, range(1,4))
-                self.buscar_arbitro(opcao)
-            elif opcao == 0:
-                buscando = False
-                return
-            buscando = self.tela.recebe_int('Procurar outra pessoa? [1 - Sim / 0 - Não]: ', [0,1])
-            
-        
-    def alterar_jogador(self):
-        menu = ['Escolher cadastro de jogador a ser alterado.', '1 - Escolher por nome', '2 - Escolher por ID']
-        opcao = self.tela.exibir_menu(menu, range(1,3))
-        jogador = self.buscar_jogador(opcao)
-        if jogador is not None:
-            alterando = True
-            while alterando:
-                try:
-                    menu = ['Informe os atributos a serem alterados:',
-                            '1 - Nome',
-                            '2 - Posição',
-                            '3 - Gols marcados',
-                            '4 - Gols cedidos',
-                            '5 - Disponibilidade',
-                            '0 - Sair']
-                    opcao = self.tela.exibir_menu(menu, range(6))
-                    if opcao == 1:
-                            nome_jogador = self.tela.recebe_str('Informe o nome do jogador: ', 3)
-                            contador = 0
-                            while contador < len(self.__jogadores_registrados):
-                                if nome_jogador ==  self.__jogadores_registrados[contador].nome and jogador.posicao == self.__jogadores_registrados[contador].posicao:
-                                    raise ValueError
-                                else:
-                                    contador += 1
-                            jogador.nome = nome_jogador
-                    elif opcao == 2:
-                            menu = ['1 - Goleiro', '2 - Defensor','3 - Meio campista', '4 - Atacante']
-                            opcao = self.tela.exibir_menu(menu, range(1,5))
-                            posicao = self.__posicoes[opcao]
-                            contador = 0
-                            while contador < len(self.__jogadores_registrados):
-                                if jogador.nome ==  self.__jogadores_registrados[contador].nome and posicao == self.__jogadores_registrados[contador].posicao:
-                                    raise ValueError
-                                else:
-                                    contador += 1
-                            jogador.posicao = posicao
-                    elif opcao == 3:
-                            gols_marcados = self.tela.recebe_int('Informe o número de gols marcados.')
-                            jogador.gols_marcados = gols_marcados
-                    elif opcao == 4:
-                            gols_concedidos = self.tela.recebe_int('Informe o número de gols cedidos.')
-                            jogador.gols_concedidos = gols_concedidos
-                    elif opcao == 5:
-                            menu = ['Informe a disponibilidade do jogador: 1 - Disponível, 0 - Indisponível']
-                            opcao = self.tela.exibir_menu(menu, range(0,2))
-                            jogador.disponivel = opcao == True
-                    else:
-                        alterando = False
-                        return
-                    alterando = self.tela.recebe_int('Realizar outra operação? [1 - Sim / 0 - Não]: ', [0,1])
-                except ValueError:
-                    self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
-    
-    def alterar_tecnico(self):
-        menu = ['Escolher cadastro de técnico a ser alterado.',
-                '1 - Escolher por nome',
-                '2 - Escolher por ID']
-        opcao = self.tela.exibir_menu(menu, range(1,3))
-        tecnico = self.buscar_tecnico(opcao)
-        if tecnico is not None:
-            alterando = True
-            while alterando:
-                try:
-                    menu = ['Informe os atributos a serem alterados:',
-                            '1 - Nome',
-                            '2 - Mentalidade',
-                            '3 - Disponibilidade',
-                            '0 - Sair']
-                    opcao = self.tela.exibir_menu(menu, range(4))
-                    if opcao == 1:
-                            nome_tecnico = self.tela.recebe_str('Informe o nome do técnico: ', 3)
-                            contador = 0
-                            while contador < len(self.__tecnicos_registrados):
-                                if nome_tecnico ==  self.__tecnicos_registrados[contador].nome and tecnico.mentalidade == self.__tecnicos_registrados[contador].mentalidade:
-                                    raise ValueError
-                                else:
-                                    contador += 1
-                            tecnico.nome = nome_tecnico
-                    elif opcao == 2:
-                            menu = ['1 - Defensiva', '2 - Moderada','3 - Ofensiva']
-                            opcao = self.tela.exibir_menu(menu, range(1,4))
-                            mentalidade = self.__mentalidades[opcao]
-                            contador = 0
-                            while contador < len(self.__tecnicos_registrados):
-                                if tecnico.nome ==  self.__tecnicos_registrados[contador].nome and mentalidade == self.__tecnicos_registrados[contador].mentalidade:
-                                    raise ValueError
-                                else:
-                                    contador += 1
-                            tecnico.mentalidade = mentalidade
-                    elif opcao == 3:
-                            menu = ['Informe a disponibilidade do técnico:',
-                                    '1 - Disponível',
-                                    '0 - Indisponível']
-                            opcao = self.tela.exibir_menu(menu, range(0,2))
-                            tecnico.disponivel = opcao == True
-                    else:
-                            alterando = False
-                            return
-                    alterando = self.tela.recebe_int('Realizar outra operação? [1 - Sim / 0 - Não]: ', [0,1])
-                except ValueError:
-                    self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
-    
-    def alterar_arbitro(self):
-        menu = ['Escolher cadastro de árbitro a ser alterado.',
-                '1 - Escolher por nome',
-                '2 - Escolher por ID']
-        opcao = self.tela.exibir_menu(menu, range(1,3))
-        arbitro = self.buscar_arbitro(opcao)
-        if arbitro is not None:
-            alterando = True
-            while alterando:
-                try:
-                    menu = ['Informe os atributos a serem alterados:',
-                            '1 - Nome',
-                            '2 - Rigidez',
-                            '0 - Sair']
-                    opcao = self.tela.exibir_menu(menu, range(3))
-                    if opcao == 1:
-                            nome_arbitro = self.tela.recebe_str('Informe o nome do árbitro: ', 3)
-                            contador = 0
-                            while contador < len(self.__arbitros_registrados):
-                                if nome_arbitro ==  self.__arbitros_registrados[contador].nome and arbitro.rigidez == self.__arbitros_registrados[contador].rigidez:
-                                    raise ValueError
-                                else:
-                                    contador += 1
-                            arbitro.nome = nome_arbitro
-                    elif opcao == 2:
-                            menu = ['1 - Brando', '2 - Moderado','3 - Severo']
-                            opcao = self.tela.exibir_menu(menu, range(1,4))
-                            rigidez = self.__rigidez[opcao]
-                            contador = 0
-                            while contador < len(self.__arbitros_registrados):
-                                if arbitro.nome ==  self.__arbitros_registrados[contador].nome and rigidez == self.__arbitros_registrados[contador].rigidez:
-                                    raise ValueError
-                                else:
-                                    contador += 1
-                            arbitro.rigidez = rigidez
-                    elif opcao == 3:
-                            menu = ['Informe a disponibilidade do árbitro:',
-                                        '1 - Disponível',
-                                        '0 - Indisponível']
-                            opcao = self.tela.exibir_menu(menu, range(0,2))
-                            arbitro.disponivel = opcao == True
-                    else:
-                            alterando = False
-                            return
-                    alterando = self.tela.recebe_int('Realizar outra operação? [1 - Sim / 0 - Não]: ', [0,1])
-                except ValueError:
-                    self.tela.mostrar_mensagem('»»»» Já existe uma pessoa com esses dados.')
-                        
-    
-    def alterar(self):
-        opcoes = {0: self.abre_tela, 1: self.alterar_jogador, 2: self.alterar_tecnico, 3: self.alterar_arbitro}
-        menu = ['1 - Alterar jogador', '2 - Alterar técnico', '3 - Alterar árbitro', '0 - Voltar ao menu inicial']
-        opcao = self.tela.exibir_menu(menu, range(4))
-        opcoes[opcao]()
 
-    
-    def listar_jogadores(self, n_entradas = None):
-        jogadores = []
-        lista = self.__jogadores_registrados
-        if n_entradas is None:
-            menu = ['1 - Listar todos os jogadores cadastrados', '2 - Listar número determinado de jogadores']
-            opcao = self.tela.exibir_menu(menu, range(1,3))
-            if opcao == 1:
-                for jogador in lista:
-                    self.mostrar_informacoes(jogador)
-                jogadores.extend(lista)
-            elif opcao == 2:
-                n_entradas = self.tela.recebe_int('Informe o número de jogadores a serem listados: ')
-                for i in range(n_entradas):
-                    jogador = self.buscar(lista)
-                    if jogador:
-                        jogadores.append(jogador)
-        if len(jogadores) == 0:
-            raise ListaError()
-        else:
-            return jogadores
-    
-    
-    def listar_tecnicos(self, n_entradas = None):
-        tecnicos = []
-        lista = self.__tecnicos_registrados
-        if n_entradas is None:
-            menu = ['1 - Listar todos os técnicos cadastrados', '2 - Listar número determinado de técnicos']
-            opcao = self.tela.exibir_menu(menu, range(1,3))
-            if opcao == 1:
-                for tecnico in lista:
-                    self.mostrar_informacoes(tecnico)
-                tecnicos.extend(lista)
-            elif opcao == 2:
-                n_entradas = self.tela.recebe_int('Informe o número de técnicos a serem listados: ')
-                for i in range(n_entradas):
-                    tecnico = self.buscar(lista)
-                    if tecnico:
-                        tecnicos.append(tecnico)
-        if len(tecnicos) == 0:
-                raise ListaError()
-        else:
-            return tecnicos
-                
-    
-        
-    def listar_arbitros(self, n_entradas = None):
-        arbitros = []
-        lista = self.__arbitros_registrados
-        if n_entradas is None:
-            menu = ['1 - Listar todos os árbitros cadastrados', '2 - Listar número determinado de árbitros']
-            opcao = self.tela.exibir_menu(menu, range(1,3))
-            if opcao == 1:
-                for arbitro in lista:
-                    self.mostrar_informacoes(arbitro)
-                arbitros.extend(lista)
-            elif opcao == 2:
-                n_entradas = self.tela.recebe_int('Informe o número de árbitros a serem listados: ')
-                for i in range(n_entradas):
-                    arbitro = self.buscar(lista)
-                    if arbitro:
-                        arbitros.append(arbitro)
-        if len(arbitros) == 0:
-            raise ListaError()
-        else:
-            return arbitros
+    def buscar(self):
+        while True:
+            self.tela.menu_buscar_pessoas(self.listar_nomes_jogadores(), self.listar_nomes_tecnicos(), self.listar_nomes_arbitros())
+            botao, valores = self.tela.abreTela()
+            try:
+                if botao == 'Confirmar':
+                    if valores['jogador']:
+                        nome_jogador = self.tela.selecionar_entradas((valores['in_jnome'], valores['lst_jnome']))
+                        jogador = self.buscar_nome(self.jogadores_registrados, nome_jogador)
+                        if not jogador:
+                            raise EntradaVaziaError()
+                        else:
+                            self.tela.fechaTela()
+                            return self.alterar(jogador)
+                    elif valores['tecnico']:
+                        nome_tecnico = self.tela.selecionar_entradas((valores['in_tnome'], valores['lst_tnome']))
+                        tecnico = self.buscar_nome(self.tecnicos_registrados, nome_tecnico)
+                        if not tecnico:
+                            raise EntradaVaziaError()
+                        else:
+                            self.tela.fechaTela()
+                            return self.alterar(tecnico)
+                    elif valores['arbitro']:
+                        nome_arbitro = self.tela.selecionar_entradas((valores['in_anome'], valores['lst_anome']))
+                        arbitro = self.buscar_nome(self.arbitros_registrados, nome_arbitro)
+                        if not arbitro:
+                            raise EntradaVaziaError()
+                        else:
+                            self.tela.fechaTela()
+                            return self.alterar(arbitro)
+                    else:
+                        raise EntradaVaziaError()
+                else:
+                    return
+            except ValueError:
+                self.tela.popup_msg_erro_cadastro()
+            except EntradaVaziaError:
+                self.tela.popup_msg_erro_cadastro()
+            finally:
+                self.tela.fechaTela()
+
+    def alterar(self, cadastro):
+        while True:
+            try:
+                if isinstance(cadastro, Jogador):
+                    jogador = cadastro
+                    dados = {'nome': jogador.nome, 'funcao': jogador.funcao, 'time': jogador.time.nome if jogador.time else '', 'posicao': jogador.posicao.posicao, 
+                            'gols_m': jogador.gols_marcados, 'gols_c': jogador.gols_concedidos}
+                    lista_posicoes = self.dict_dados()['posicoes']
+                    self.tela.janela_jogador(dados, lista_posicoes)
+                    botao, valores = self.tela.abreTela()
+                    if botao == 'Confirmar':
+                        if valores['nome_jogador'] != jogador.nome or valores['posicao'] != jogador.posicao.posicao:
+                            botao = self.tela.popup_confirmar_alteracao()
+                            if botao == 'Confirmar':
+                                jogador.posicao = self.pegar_posicao(valores['posicao'])
+                                indisponivel = self.buscar_nome(self.jogadores_registrados, valores['nome_jogador'])
+                                if indisponivel:
+                                    raise DadoIndisponivelError()
+                                else:
+                                    jogador.nome = valores['nome_jogador']                  
+                    elif botao == 'excluir':
+                        return self.excluir(jogador)
+                    else:
+                        return
+                elif isinstance(cadastro, Tecnico):
+                    tecnico = cadastro
+                    dados = {'nome': tecnico.nome, 'funcao': tecnico.funcao, 'mentalidade': tecnico.mentalidade.mentalidade}
+                    lista_mentalidades = self.dict_dados()['mentalidades']
+                    self.tela.janela_tecnico(dados, lista_mentalidades)
+                    botao, valores = self.tela.abreTela()
+                    if botao == 'Confirmar':
+                        if valores['nome_tecnico'] != tecnico.nome or valores['mentalidade'] != tecnico.mentalidade.mentalidade:
+                            botao = self.tela.popup_confirmar_alteracao()
+                            if botao == 'Confirmar':
+                                tecnico.mentalidade = self.pegar_mentalidade(valores['mentalidade'])
+                                indisponivel = self.buscar_nome(self.tecnicos_registrados, valores['nome_tecnico'])
+                                if indisponivel:
+                                    raise DadoIndisponivelError()
+                                else:
+                                    tecnico.nome = valores['nome_tecnico']
+                    elif botao == 'excluir':
+                        return self.excluir(tecnico)
+                    else:
+                        return
+                elif isinstance(cadastro, Arbitro):
+                    arbitro = cadastro
+                    dados = {'nome': arbitro.nome, 'funcao': arbitro.funcao, 'rigidez': arbitro.rigidez}
+                    lista_rigidez = self.dict_dados()['rigidez']
+                    self.tela.janela_arbitro(dados, lista_rigidez)
+                    botao, valores = self.tela.abreTela()
+                    if botao == 'Confirmar':
+                        if valores['nome_arbitro'] != arbitro.nome or valores['rigidez'] != arbitro.rigidez.rigidez:
+                            botao = self.tela.popup_confirmar_alteracao()
+                            if botao == 'Confirmar':
+                                arbitro.rigidez = valores['rigidez']
+                                indisponivel = self.buscar_nome(self.arbitros_registrados, valores['nome_arbitro'])
+                                if indisponivel:
+                                    raise DadoIndisponivelError()
+                                else:
+                                    arbitro.nome = valores['nome_arbitro']
+                    elif botao == 'excluir':
+                        return self.excluir(arbitro)
+                    else:
+                        return
+                else:
+                    raise EntradaVaziaError()
+            except EntradaVaziaError:
+                self.tela.popup_msg_erro_cadastro()
+            except DadoIndisponivelError:
+                #fazer popup 'já existe um cadastro com essas informações
+                self.tela.popup_msg_erro_cadastro()
+            except TypeError:
+                self.tela.popup_msg_erro_cadastro()
+            finally:
+                self.tela.fechaTela()
 
 
     def listar(self, opcao = None):
-        try:
-            opcoes = {0: self.abre_tela, 1: self.listar_jogadores, 2: self.listar_tecnicos, 3: self.listar_arbitros}
-            if opcao is None:
-                menu = ['1 - Listar jogadores', '2 - Listar técnicos','3 - Listar Árbitros', '0 - Voltar ao menu inicial']
-                opcao = self.tela.exibir_menu(menu, range(len(opcoes)))
-                opcoes[opcao]()
-            elif isinstance(opcao, int) and opcao in range(len(opcoes)):
-                opcoes[opcao]()
-            else:
-                raise ValueError
-        except ValueError:
-            self.tela.mostrar_mensagem('»»»» Somente é possível listar jogadores, técnicos ou árbitros.')
-        except ListaError:
-            self.tela.mostrar_mensagem('»»»» Não foram informadas pessoas a serem adicionadas.')
+        pass
 
-        
-    def excluir_jogador(self):
-        opcoes = {1: self.buscar_nome, 2: self.buscar_id}
-        menu = ['1 - Excluir por nome', '2 - Excluir por ID']
-        opcao = self.tela.exibir_menu(menu, range(1,3))
-        jogador = self.buscar_jogador(opcao)
-        if jogador:
-            self.__jogadores_registrados.remove(jogador)
-            if jogador not in self.__jogadores_registrados:
-                self.tela.mostrar_mensagem('Jogador excluído com sucesso.')
-            else:
-                self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
-            
-    def excluir_tecnico(self):
-        opcoes = {1: self.buscar_nome, 2: self.buscar_id}
-        menu = ['1 - Excluir por nome', '2 - Excluir por ID']
-        opcao = self.tela.exibir_menu(menu, range(1,3))
-        tecnico = self.buscar_tecnico(opcao)
-        if tecnico:
-            self.__tecnicos_registrados.remove(tecnico)
-            if tecnico not in self.__tecnicos_registrados:
-                self.tela.mostrar_mensagem('Técnico excluído com sucesso.')
-            else:
-                self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')
-        
-    def excluir_arbitro(self):
-        opcoes = {1: self.buscar_nome, 2: self.buscar_id}
-        menu = ['1 - Excluir por nome', '2 - Excluir por ID']
-        opcao = self.tela.exibir_menu(menu, range(1,3))
-        arbitro = self.buscar_arbitro(opcao)
-        if arbitro:
-            self.__arbitros_registrados.remove(arbitro)
-            if arbitro not in self.__arbitros_registrados:
-                self.tela.mostrar_mensagem('Árbitro excluído com sucesso.')
-            else:
-                self.tela.mostrar_mensagem('Não foi possível realizar a exclusão.')           
-        
-    def excluir(self):
-        try:
-            opcoes = {0: self.abre_tela, 1: self.excluir_jogador, 2: self.excluir_tecnico, 3: self.excluir_arbitro}
-            menu = ['1 - Excluir jogador', '2 - Excluir técnico','3 - Excluir árbitro', '0 - Voltar ao menu inicial']
-            opcao = self.tela.exibir_menu(menu, range(len(opcoes)))
-            opcoes[opcao]()
-        except Exception:
-            self.tela.mostrar_mensagem('»»»» Somente é possível excluir jogadores, técnicos ou árbitros.')
-        
-    def mostrar_informacoes(self, pessoa):
-            self.tela.mostrar_mensagem('')
-            self.tela.mostrar_mensagem('>: ')
-            self.tela.mostrar_mensagem(pessoa)
-    
+
+    def excluir(self, cadastro):
+        botao = self.tela.popup_msg_excluir()
+        if botao == 'Confirmar':
+            if isinstance(cadastro, Jogador):
+                lista = self.__jogadores_registrados
+                time = cadastro.time
+                if not time == None or time != '':
+                    time.remover_jogadores([cadastro])
+                lista.remove(cadastro)
+            elif isinstance(cadastro, Tecnico):
+                lista = self.__tecnicos_registrados
+                time = cadastro.time
+                if not time == None or time != '':
+                    time.tecnico = None
+                lista.remove(cadastro)
+            elif isinstance(cadastro, Arbitro):
+                lista = self.__arbitros_registrados
+                lista.remove(cadastro)
+            self.tela.popup_cadastro_excluido()
+        return
+
+
     def abre_tela(self):
         tela = True
         while tela:
-            opcoes = {1: self.cadastrar, 2: self.buscar_pessoas, 3: self.alterar, 4: self.listar,
-                      5: self.excluir}
-            menu = ['1 - Cadastrar pessoa', '2 - Buscar pessoa', '3 - Alterar pessoa',
-                    '4 - Listar pessoa', '5 - Excluir pessoa', '0 - Sair']
-            opcao = self.tela.exibir_menu(menu, range(6))
-            if opcao != 0:
-                opcoes[opcao]()
+            opcoes = {1: self.cadastrar, 2: self.buscar, 3: self.alterar, 4: self.listar, 5: self.excluir}
+            self.tela.exibir_menu()
+            botao, valores = self.tela.abreTela()
+            self.tela.fechaTela()
+            if botao == 'Confirmar':
+                for key in valores:
+                    if valores[key]:
+                        opcoes[key]()
             else:
                 tela = False

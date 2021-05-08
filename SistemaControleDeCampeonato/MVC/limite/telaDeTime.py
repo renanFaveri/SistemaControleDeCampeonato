@@ -5,7 +5,7 @@ class TelaDeTimes:
     def __init__(self, controlador):
         self.__controlador = controlador
         self.__janela = None
-    
+
     @property
     def janela(self):
         return self.__janela
@@ -178,7 +178,8 @@ class TelaDeTimes:
         for jogador in ordenacao(time_dict_dados['jogadores']):
             txt_jogadores += jogador[0] + '\t' * 2 + jogador[1] + '\t' * 2 + f'{jogador[2]}' + '\n'
 
-        stats = f"""Partidas jogadas:\t\t{time_dict_dados['vitorias'] + time_dict_dados['empates'] + time_dict_dados['derrotas']}
+        stats = f"""Técnico\t\t{time_dict_dados['tecnico']}
+Partidas jogadas:\t\t{time_dict_dados['vitorias'] + time_dict_dados['empates'] + time_dict_dados['derrotas']}
 Vitórias:\t\t{time_dict_dados['vitorias']}
 Empates:\t\t{time_dict_dados['empates']}
 Derrotas:\t\t{time_dict_dados['derrotas']}
@@ -192,12 +193,10 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
                         [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))), 
                         sgui.Button('Voltar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30)))]], 
                   element_justification='center', vertical_alignment='c', background_color=background)]]
-
         nome = [sgui.Frame('Alterar nome do time', font=('Candara', 12,'bold'), title_color='#FAE98E', background_color='#06470F',
                         layout=[[sgui.Column(vertical_alignment='b', background_color='#06470F', size=(1000,40), 
                                 layout=[[sgui.Text('Nome:', size=(50,0), background_color='#06470F', font=('Candara', 12,'bold')), 
                                 sgui.InputText(default_text=time_dict_dados['nome'], size=(40,1), font=(16), pad=((25,20),0), key=('time_nome'))]])]])]
-        
         cores = [sgui.Frame('Alterar cores do time', font=('Candara', 12,'bold'), title_color='#FAE98E', background_color='#06470F', vertical_alignment='top',
                         layout=[[sgui.Column(vertical_alignment='b', background_color='#06470F', size=(1000,200), 
                                 layout=[[sgui.Text('Escolha no botão a cor primária do time:', size=(40,1), background_color='#06470F', font=('Candara', 12,'bold')),
@@ -212,20 +211,21 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         lista_jogadores = [sgui.Multiline(txt_jogadores, text_color='white', font=(12) , background_color=background, size=(50,11), disabled=True)]
         estatisticas = [sgui.Multiline(stats, text_color='white', font=(12), background_color=background, size=(30,11), no_scrollbar=True, disabled=True)]
         frame_jogadores = [sgui.Frame('Jogadores', layout = [lista_jogadores], title_color='#FAE98E', background_color='#06470F')]
-        frame_estatisticas = [sgui.Frame('Estatísticas', layout = [estatisticas], title_color='#FAE98E', background_color='#06470F')]
-        
+        frame_estatisticas = [sgui.Frame('Informações', layout = [estatisticas], title_color='#FAE98E', background_color='#06470F')]
+        botao_ctecnico = [sgui.Button('Contratar técnico', size=(15,3), font=('Candara', 14,'bold'), border_width=6, focus=True, button_color=('white', '#5161F9'), key='contratar_tecnico')]
+        botao_dtecnico = [sgui.Button('Demitir técnico', size=(15,3), font=('Candara', 14,'bold'), border_width=6, focus=True, button_color=('white', '#D351F9'), key='demitir_tecnico')]
         botao_contratar = [sgui.Button('Contratar jogador', size=(15,3), font=('Candara', 14,'bold'), border_width=6, focus=True, button_color=('white', '#01c906'), key='contratar')]
         botao_vender = [sgui.Button('Vender jogador', size=(15,3), font=('Candara', 14,'bold'), border_width=6, focus=True, button_color=('white', '#ff9f11'), key='vender')]
-        col_botoes = [sgui.Column([botao_contratar, botao_vender], background_color='#06470F')]
-        frame_dados = [sgui.Frame('', layout = [frame_estatisticas + frame_jogadores + col_botoes], background_color='#06470F')]
+        col_botoes1 = [sgui.Column([botao_contratar, botao_vender], background_color='#06470F')]
+        col_botoes2 = [sgui.Column([botao_ctecnico, botao_dtecnico], background_color='#06470F')]
+        frame_dados = [sgui.Frame('', layout = [col_botoes2 + frame_estatisticas + frame_jogadores + col_botoes1], background_color='#06470F')]
         botao_excluir = [sgui.Button('Declarar falência', size=(10,2), font=('Candara', 14), border_width=2, focus=True, button_color=('white', 'dark red'), key='excluir')]
         layout = header +  [nome] + [cores] + [frame_dados] + [botao_excluir]
         window = sgui.Window('Cadastro de time', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
         self.__janela = window
         return
 
-
-    def tela_vender_jogador(self, lista_nomes_jogadores):
+    def tela_vender_jogador(self, lista_dados_jogadores):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -235,7 +235,7 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
                         sgui.Button('Cancelar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30)))]], 
                   element_justification='center', vertical_alignment='c', background_color=background)]]
         linha1 = [sgui.Text('Selecione os jogadores que deseja vender:'.upper(), font=('Candara', 16,'bold'), text_color=text, background_color=background, size=(90,1), justification='left')]
-        lista_jogadores = [sgui.Listbox([nome_jogador for nome_jogador in lista_nomes_jogadores], select_mode=sgui.LISTBOX_SELECT_MODE_MULTIPLE, text_color='white', 
+        lista_jogadores = [sgui.Listbox([f'{dados_jogador[0]}'.ljust(30-len(dados_jogador[0]), ' ') + '---' + f'{" "*4}{dados_jogador[1]}' for dados_jogador in lista_dados_jogadores], select_mode=sgui.LISTBOX_SELECT_MODE_MULTIPLE, text_color='white', 
                             font=(12), background_color=background, size=(110,11), key='lstbox')]
         frame_jogadores = [sgui.Frame('Jogadores', layout = [lista_jogadores], title_color='#FAE98E', background_color='#06470F')]
         layout = header + [linha1] + [frame_jogadores]
@@ -261,7 +261,6 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
                             select_mode=sgui.LISTBOX_SELECT_MODE_MULTIPLE, text_color='white', font=(12), background_color=background, size=(40,13), key='box_meio_campistas')]
         lista_atacantes = [sgui.Listbox([atacante for atacante in lista_atacantes],
                             select_mode=sgui.LISTBOX_SELECT_MODE_MULTIPLE, text_color='white', font=(12), background_color=background, size=(40,13), key='box_atacantes')]
-
         frame_goleiros = [sgui.Frame('Goleiros', layout=[lista_goleiros], title_color='#FAE98E', pad=((60,20),(20,10)), background_color='#06470F')]
         frame_defensores = [sgui.Frame('Defensores', layout=[lista_defensores], title_color='#FAE98E', pad=((20,60),(20,10)), background_color='#06470F')]
         frame_meio_campistas = [sgui.Frame('Meio campistas', layout=[lista_meio_campistas], title_color='#FAE98E', pad=((60,20),(10,20)), background_color='#06470F')]
@@ -272,6 +271,37 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         self.__janela = window
         return
 
+    def tela_contratar_tecnico(self, lista_tecnicos):
+        background = '#20660C'
+        text = '#FAE98E'
+        button_color=('#F3EE44', '#06470F')
+        header = [[sgui.Column(layout=[[sgui.Text(f'Contratar técnico'.upper(), text_color=text, background_color=background, 
+                        font=('Candara', 25, 'bold'), size=(30,1), justification='center')],
+                        [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))), 
+                        sgui.Button('Cancelar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30)))]], 
+                    element_justification='center', vertical_alignment='c', background_color=background)]]
+        linha1 = [sgui.Text('Selecione o técnico que deseja contratar:'.upper(), font=('Candara', 16,'bold'), text_color=text, background_color=background, size=(70,1), justification='left')]
+        tecnicos = [sgui.Listbox([tecnico for tecnico in lista_tecnicos],
+                            select_mode=sgui.LISTBOX_SELECT_MODE_SINGLE, text_color='white', font=(12), background_color=background, size=(60,13), key='box_tecnicos')]
+        frame_tecnicos = [sgui.Frame('Técnicos', layout=[tecnicos], title_color='#FAE98E', pad=(80,20), background_color='#06470F')]
+        frame = [sgui.Frame('', layout = [frame_tecnicos], title_color='#FAE98E', background_color='#06470F')]
+        layout = header + [linha1] + [frame]
+        window = sgui.Window('Chama o mister', layout, background_color=background, finalize=True, element_padding=(20,10), element_justification='center')
+        self.__janela = window
+        return
+
+    def popup_confirmar_demissao(self, nome_tecnico):
+        background = '#20660C'
+        text = '#FAE98E'
+        button_color=('#F3EE44', '#06470F')
+        layout = [[sgui.Text(f'Confirmar a demissão de {nome_tecnico}?', size=(30,1), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
+                        border_width=(10), font=('Candara', 14, 'bold'), justification='c')],
+                  [sgui.Button('Confirmar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color), 
+                        sgui.Button('Cancelar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color)]]
+        window = sgui.Window('Goodbye, mister', layout, background_color=background, element_justification='Center', element_padding=(10,10), force_toplevel=True, keep_on_top=True)
+        botao, valores = window.Read()
+        window.Close()
+        return botao
 
     def popup_confirmar_venda(self, len_lista):
         n_jogadores = len_lista
@@ -301,7 +331,7 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         botao, valores = window.Read()
         window.Close()
         return botao
-        
+
     def popup_confirmar_alteracao(self):
         background = '#20660C'
         text = '#FAE98E'
@@ -330,7 +360,7 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
                         return entrada2
             else:
                 return
-    
+
 
     def strip_str(self, resposta):
         aux = ''
@@ -339,3 +369,4 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
             aux += n + ' '
         resposta = aux.strip().title()
         return resposta
+

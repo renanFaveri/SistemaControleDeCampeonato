@@ -1,5 +1,6 @@
 from .time import Time
 from MVC.exceptionLista import ListaError
+from MVC.exceptionCampeonatoCompleto import CampeonatoCompletoError
 
 class Campeonato:
 
@@ -9,7 +10,10 @@ class Campeonato:
         self.__n_times = n_times
         self.__times = times
         self.__partidas = []
-        self.__estatatisticas = None
+        self.__tabela = None
+
+    def dict_dados(self):
+        return {'id': self.__id, 'nome': self.__nome, 'n_times': self.__n_times, 'times': [time.nome for time in self.__times], 'tabela': self.gerar_tabela()}
 
     @property
     def id_(self):
@@ -22,7 +26,12 @@ class Campeonato:
     @nome.setter
     def nome(self, nome):
         if isinstance(nome, str):
-            self.__nome = nome
+            if len(nome) > 0:
+                self.__nome = nome
+            else:
+                raise EntradaVaziaError()
+        else:
+            raise TypeError
 
     @property
     def n_times(self):
@@ -43,7 +52,7 @@ class Campeonato:
     def adicionar_times(self, times: list):
         if isinstance(times, list):
             if (len(times) + len(self.times)) > self.n_times:
-                    raise ValueError
+                    raise CampeonatoCompletoError()
             for time in times:                
                 if not isinstance(time, Time):
                     raise TypeError
@@ -69,17 +78,14 @@ class Campeonato:
     def partidas(self):
         return self.__partidas
 
-    @property
-    def estatisticas(self):
-        return self.__estatisticas
-
-    def gerar_estatisticas(self):
-        tabela = """Posição\tTime\t\tPontos | Vitórias | Empates | Derrotas\n"""
-        for time in self.times:
-            tabela += f"""      {self.times.index(time)+1}\t{time.nome}\t\t{' '*5}{(time.vitorias*3)+(time.empates*1)}{('|'.center(13,' '))}{time.vitorias}\
-{('|'.center(16,' '))}{time.empates}{('|'.center(17,' '))}{time.derrotas}\n"""
-        self.__estatisticas = tabela
-        return self.__estatisticas
+    def gerar_tabela(self):
+        lista = sorted(self.times, key=lambda time: time.vitorias*3+time.empates, reverse=True)
+        tabela = 'Posição'.center(10, ' ') + '\t' + 'Time'.center(20, ' ') + '\t' + '\t' + '\t' + 'Pts      |      V      |      E      |      D      ' + '\n' + '-'*105 + '\n'
+        for i in range(len(lista)):
+            tabela += f'{i+1}'.center(16, ' ') + '\t' + f'{lista[i].nome}'.center(16, ' ') + '\t' + '\t' + '\t' +\
+                f'  {lista[i].vitorias*3 + lista[i].empates}       |      {lista[i].vitorias}      |      {lista[i].empates}      |      {lista[i].derrotas}      ' + '\n'
+        self.__tabela = tabela
+        return self.__tabela
     
     def __str__(self):
         return f'Nome: {self.nome}; ID: {self.id_}; Número de times competidores: {len(self.times)}; Capacidade do campeonato: {self.n_times} times'

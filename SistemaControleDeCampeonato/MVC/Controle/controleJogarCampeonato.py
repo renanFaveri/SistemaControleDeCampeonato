@@ -17,7 +17,7 @@ class JogarCampeonato:
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
         self.__tela = TelaDePartidas(self)
-        self.__p = [Partida(self.__controlador_master.cp.arbitros_registrados[0], self.__controlador_master.ct.time_DAO[0], self.__controlador_master.ct.time_DAO[1])]
+        self.__partidas = [Partida(self.__controlador_master.cp.arbitros_registrados[0], self.__controlador_master.ct.time_DAO[0], self.__controlador_master.ct.time_DAO[1])]
     
     @property
     def cm(self):
@@ -27,9 +27,14 @@ class JogarCampeonato:
     def tela(self):
         return self.__tela
 
+    @tela.setter
+    def tela(self, tela):
+        if isinstance(tela, Tela):
+            self.__tela = tela
+
     @property
     def partidas(self):
-        return self.__p
+        return self.__partidas
     
     
     def jogar_amistoso(self):
@@ -54,11 +59,6 @@ class JogarCampeonato:
             try:        
                 if isinstance(time_anfitriao, Time) and isinstance(time_visitante, Time) and isinstance(arbitro_designado, Arbitro) and (time_anfitriao != time_visitante):
                     if (len(time_anfitriao.jogadores) < time_anfitriao.min_jogadores) or (len(time_visitante.jogadores) < time_visitante.min_jogadores):
-                        #
-                        #
-                        # FAZER POPUP PARA TIME INCOMPLETO
-                        #
-                        #
                         raise TimeIncompletoError()
                     else:
                         partida = Partida(time_anfitriao, time_visitante, arbitro_designado)
@@ -221,7 +221,6 @@ class JogarCampeonato:
         self.tela.janela_final_partida(partida.dict_dados(), ta.dict_dados(), tv.dict_dados())
         partida.jogada = True
 
-    
     def jogar(self, partida: Partida, multiplas_partidas = False):
         if not multiplas_partidas:
             self.tela.janela_inicio_partida(partida.dict_dados(), partida.time_anfitriao.dict_dados(), partida.time_visitante.dict_dados())
