@@ -5,7 +5,7 @@ class DAO(ABC):
     @abstractmethod
     def __init__(self, datasource=''):
         self.__datasource = datasource
-        self.__cache = [] #é aqui que vai ficar a lista que estava no controlador. Nesse exemplo estamos usando um dicionario
+        self.__cache = []
         try:
             self.__load()
         except FileNotFoundError:
@@ -21,26 +21,23 @@ class DAO(ABC):
     def __load(self):
         self.__cache = pickle.load(open(self.__datasource,'rb'))
 
-    #esse método precisa chamar o self.__dump()
     def add(self, obj):
         self.__cache.append(obj)
-        self.__dump()  #atualiza o arquivo depois de add 
+        self.__dump()
 
     def get(self, key):
-        try:
-            return self.__cache(key)
-        except KeyError:
-            pass #implementar aqui o tratamento da exceção
+        while self.__cache.index(g) != key:
+            g =+ 1
+        return self.__cache(g)
 
-    # esse método precisa chamar o self.__dump()
     def remove(self, key):
-        try:
-            self.__cache.pop(key)
-            self.__dump() #atualiza o arquivo depois de remover um objeto
-        except KeyError:
-            pass #implementar aqui o tratamento da exceção
+        while self.__cache.index(r) != key:
+            r =+ 1
+        self.__cache.pop(r)
+        self.__dump()
 
     def get_all(self):
         return self.__cache.values()
 
-
+    def atualiza(self, obj):
+        self.__dump()
