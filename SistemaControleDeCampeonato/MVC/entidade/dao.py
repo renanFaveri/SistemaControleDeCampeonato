@@ -28,7 +28,7 @@ class DAO(ABC):
     def get(self, obj):
         for i in range(len(self.__cache)):
             if self.__cache[i] == obj:
-                return self.__cache
+                return self.__cache[i]
 
 #     def get(self, key):
 #         while self.__cache.index(g) != key:
