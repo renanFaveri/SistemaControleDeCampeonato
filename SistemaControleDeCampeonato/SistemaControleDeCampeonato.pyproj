@@ -114,10 +114,22 @@
     <Compile Include="MVC\entidade\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\exceptionCampeonatoCompleto.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\exceptionCapacidadeMax.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\exceptionCaracter.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MVC\exceptionDadosIndisponivel.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MVC\exceptionTime.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MVC\exceptionTimeCompleto.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MVC\exceptionVazia.py">
