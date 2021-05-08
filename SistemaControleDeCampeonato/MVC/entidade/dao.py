@@ -24,20 +24,38 @@ class DAO(ABC):
     def add(self, obj):
         self.__cache.append(obj)
         self.__dump()
+        
+    def get(self, obj):
+        for i in range(len(self.__cache)):
+            if self.__cache[i] == obj:
+                return self.__cache
 
-    def get(self, key):
-        while self.__cache.index(g) != key:
-            g =+ 1
-        return self.__cache(g)
+#     def get(self, key):
+#         while self.__cache.index(g) != key:
+#             g =+ 1
+#         return self.__cache(g)
 
-    def remove(self, key):
-        while self.__cache.index(r) != key:
-            r =+ 1
-        self.__cache.pop(r)
+    def remove_and_return(self, obj):
+        objeto = self.get(obj)
+        self.__cache.remove(objeto)
         self.__dump()
+        return objeto
+
+#     def remove(self, key):
+#         while self.__cache.index(r) != key:
+#             r =+ 1
+#         self.__cache.pop(r)
+#         self.__dump()
 
     def get_all(self):
-        return self.__cache.values()
+        return [item for item in self.__cache]
+    
+    def atualizar(self):
+        return self.__load()
 
-    def atualiza(self, obj):
-        self.__dump()
+    def atualizar_objeto(self, obj):
+        for i in range(len(self.__cache)):
+            if self.__cache[i] == obj:
+                self.__cache[i] = obj
+                self.__dump()
+                return
