@@ -3,7 +3,7 @@ from .dao import DAO
 
 class JogadorDAO(DAO):
     def __init__(self):
-        super().__init__('jogadores.pkl')
+        super().__init__('jogador.pkl')
 
     def add(self, jogador: Jogador):
         if isinstance(jogador, Jogador):
@@ -13,7 +13,10 @@ class JogadorDAO(DAO):
         if isinstance(key, int):
             return super().get(key)
 
-    def remove(selfself, key:int):
+    def remove(self, key:int):
         if(isinstance(key, int)):
             return super().remove(key)
 
+    def atualizar (self, jogador: Jogador):
+        if isinstance(jogador, Jogador):
+            super().atualiza(jogador)
