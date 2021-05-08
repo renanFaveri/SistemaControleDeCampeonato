@@ -1,4 +1,5 @@
 from .controleDeEntidade import ControladorDeEntidade
+from .controleDeTime import ControladorDeTimes
 from MVC.entidade.pessoa import Pessoa
 from MVC.entidade.posicao import Posicao
 from MVC.entidade.goleiro import Goleiro
@@ -31,14 +32,14 @@ class ControladorDePessoas(ControladorDeEntidade):
         self.__posicoes = {1: Goleiro(), 2: Defensor(), 3: MeioCampista(), 4: Atacante()}
         self.__mentalidades = {1: Defensiva(), 2: Moderada(), 3: Ofensiva()}
         self.__rigidez = {1: Brando(), 2: Moderado(), 3: Severo()}
-        self.__jogadores_registrados = [Jogador('Jogador Um', self.__posicoes[1]), Jogador('Jogador Dois', self.__posicoes[4]), Jogador('Jogador Tres', self.__posicoes[1]), 
-                Jogador('Jogador Quatro', self.__posicoes[4]), Jogador('Jogador Cinco', self.__posicoes[1]), Jogador('Jogador Seis', self.__posicoes[4]), Jogador('Jogador Sete', self.__posicoes[1]),
-                Jogador('Jogador Oito', self.__posicoes[4]), Jogador('Jogador Nove', self.__posicoes[2]), Jogador('Jogador Dez', self.__posicoes[3]), Jogador('Jogador Onze', self.__posicoes[2]),
-                Jogador('Jogador Doze', self.__posicoes[3]), Jogador('Jogador Treze', self.__posicoes[4])]
+        self.__jogador_DAO = JogadorDAO()
         self.__tecnicos_registrados = []
         self.__arbitros_registrados = [Arbitro('Margarida', self.__rigidez[3])]
         self.__tela = TelaDePessoas(self)
 
+    @property
+    def jogador_DAO(self):
+        return self.__jogador_DAO.cache
 
     @property
     def tela(self):
@@ -52,10 +53,6 @@ class ControladorDePessoas(ControladorDeEntidade):
     @property
     def tecnicos_registrados(self):
         return self.__tecnicos_registrados
-
-    @property
-    def jogadores_registrados(self):
-        return self.__jogadores_registrados
 
     @property
     def arbitros_registrados(self):
@@ -84,14 +81,14 @@ class ControladorDePessoas(ControladorDeEntidade):
         return [tecnico.nome for tecnico in self.__tecnicos_registrados]
 
     def listar_nomes_jogadores(self):
-        return [jogador.nome for jogador in self.__jogadores_registrados]
+        return [jogador.nome for jogador in self.__jogador_DAO.cache]
 
     def listar_gdma_disponiveis(self):
         g = []
         d = []
         m = []
         a = []
-        for jogador in self.jogadores_registrados:
+        for jogador in self.__jogador_DAO.cache:
             if not jogador.time or jogador.time == '':
                 if jogador.posicao.posicao == 'Goleiro':
                     g.append(jogador.nome)
@@ -155,7 +152,7 @@ class ControladorDePessoas(ControladorDeEntidade):
                         jogador = Jogador(nome_jogador, posicao)
                         botao = self.tela.popup_confirmar_cadastro((jogador.nome, jogador.funcao, jogador.posicao.posicao))
                         if botao == 'Confirmar':
-                            self.__jogadores_registrados.append(jogador)
+                            self.__jogador_DAO.add(jogador)
                             self.tela.popup_cadastro_criado()
                     elif valores['tecnico']:
                         nome_tecnico = self.tela.strip_str(valores['tecnico_nome']).title()
@@ -210,7 +207,7 @@ class ControladorDePessoas(ControladorDeEntidade):
                 if botao == 'Confirmar':
                     if valores['jogador']:
                         nome_jogador = self.tela.selecionar_entradas((valores['in_jnome'], valores['lst_jnome']))
-                        jogador = self.buscar_nome(self.jogadores_registrados, nome_jogador)
+                        jogador = self.buscar_nome(self.__jogador_DAO.cache, nome_jogador)
                         if not jogador:
                             raise EntradaVaziaError()
                         else:
@@ -258,13 +255,14 @@ class ControladorDePessoas(ControladorDeEntidade):
                             botao = self.tela.popup_confirmar_alteracao()
                             if botao == 'Confirmar':
                                 jogador.posicao = self.pegar_posicao(valores['posicao'])
-                                indisponivel = self.buscar_nome(self.jogadores_registrados, valores['nome_jogador'])
+                                indisponivel = self.buscar_nome(self.__jogador_DAO.cache, valores['nome_jogador'])
                                 if indisponivel:
                                     raise DadoIndisponivelError()
                                 else:
-                                    jogador.nome = valores['nome_jogador']                  
+                                    jogador.nome = valores['nome_jogador']
+                                    self.__jogador_DAO.atualizar(jogador)
                     elif botao == 'excluir':
-                        return self.excluir(jogador)
+                        return self.excluir(jogador) and self.__jogador_DAO.remove(jogador)
                     else:
                         return
                 elif isinstance(cadastro, Tecnico):
@@ -328,10 +326,11 @@ class ControladorDePessoas(ControladorDeEntidade):
         botao = self.tela.popup_msg_excluir()
         if botao == 'Confirmar':
             if isinstance(cadastro, Jogador):
-                lista = self.__jogadores_registrados
+                lista = self.__jogador_DAO.cache
                 time = cadastro.time
                 if not time == None or time != '':
                     time.remover_jogadores([cadastro])
+                    #OBS: Atualizar persistencia de time 
                 lista.remove(cadastro)
             elif isinstance(cadastro, Tecnico):
                 lista = self.__tecnicos_registrados

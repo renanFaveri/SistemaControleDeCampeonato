@@ -137,10 +137,11 @@ class ControladorDeTimes(ControladorDeEntidade):
             try:
                 if botao == 'Confirmar':
                     negociados = valores['box_goleiros'] + valores['box_defensores'] + valores['box_meio_campistas'] + valores['box_atacantes']
-                    jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, jogador) for jogador in negociados]
+                    jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogador_DAO, jogador) for jogador in negociados]
                     botao = self.tela.popup_confirmar_compra(len(jogadores))
                     if botao == 'Confirmar':
                         time.adicionar_jogadores(jogadores)
+                        self.__time_DAO.atualizar(time)
                         return
                 else:
                     break
@@ -155,10 +156,11 @@ class ControladorDeTimes(ControladorDeEntidade):
         botao, valores = self.tela.abreTela()
         if botao == 'Confirmar':
             nomes_jogadores = [nome.split('-')[0] for nome in valores['lstbox']]
-            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogadores_registrados, self.tela.strip_str(jogador)) for jogador in nomes_jogadores]
+            jogadores = [self.cm.cp.buscar_nome(self.cm.cp.jogador_DAO, self.tela.strip_str(jogador)) for jogador in nomes_jogadores]
             botao = self.tela.popup_confirmar_venda(len(jogadores))
             if botao == 'Confirmar':
                 time.remover_jogadores(jogadores)
+                self.__time_DAO.atualizar(time)
         self.tela.fechaTela()
         return 
 
