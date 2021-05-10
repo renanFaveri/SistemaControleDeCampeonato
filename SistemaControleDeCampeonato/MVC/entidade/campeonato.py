@@ -1,6 +1,7 @@
 from .time import Time
 from MVC.exceptionLista import ListaError
-from MVC.exceptionCampeonatoCompleto import CampeonatoCompletoError
+from MVC.exceptionVazia import EntradaVaziaError
+from MVC.exceptionCapacidadeMax import CapacidadeMaximaError
 
 class Campeonato:
 
@@ -14,7 +15,7 @@ class Campeonato:
 
     def dict_dados(self):
         return {'id': self.__id, 'nome': self.__nome, 'n_times': self.__n_times, 'times': [time.nome for time in self.__times], 'tabela': self.gerar_tabela()}
-
+        
     @property
     def id_(self):
         return self.__id
@@ -52,7 +53,7 @@ class Campeonato:
     def adicionar_times(self, times: list):
         if isinstance(times, list):
             if (len(times) + len(self.times)) > self.n_times:
-                    raise CampeonatoCompletoError()
+                    raise CapacidadeMaximaError()
             for time in times:                
                 if not isinstance(time, Time):
                     raise TypeError
@@ -89,4 +90,5 @@ class Campeonato:
     
     def __str__(self):
         return f'Nome: {self.nome}; ID: {self.id_}; Número de times competidores: {len(self.times)}; Capacidade do campeonato: {self.n_times} times'
+    
     

@@ -2,6 +2,7 @@ import pickle
 from abc import ABC, abstractmethod
 
 class DAO(ABC):
+
     @abstractmethod
     def __init__(self, datasource=''):
         self.__datasource = datasource
@@ -16,10 +17,12 @@ class DAO(ABC):
         return self.__cache
 
     def __dump(self):
-        pickle.dump(self.__cache, open(self.__datasource, 'wb'))
-
+        with open(self.__datasource, 'wb') as source:
+            pickle.dump(self.__cache, source)
+        
     def __load(self):
-        self.__cache = pickle.load(open(self.__datasource,'rb'))
+        with open(self.__datasource,'rb') as source:
+            self.__cache = pickle.load(source)
 
     def add(self, obj):
         self.__cache.append(obj)
@@ -27,35 +30,25 @@ class DAO(ABC):
         
     def get(self, obj):
         for i in range(len(self.__cache)):
-            if self.__cache[i] == obj:
+            if self.__cache[i].id_ == obj.id_:
                 return self.__cache[i]
 
-#     def get(self, key):
-#         while self.__cache.index(g) != key:
-#             g =+ 1
-#         return self.__cache(g)
-
-    def remove_and_return(self, obj):
+    def remover_e_retornar(self, obj):
         objeto = self.get(obj)
         self.__cache.remove(objeto)
         self.__dump()
         return objeto
-
-#     def remove(self, key):
-#         while self.__cache.index(r) != key:
-#             r =+ 1
-#         self.__cache.pop(r)
-#         self.__dump()
-
-    def get_all(self):
-        return [item for item in self.__cache]
     
-    def atualizar(self):
+    def carregar(self):
         return self.__load()
 
     def atualizar_objeto(self, obj):
         for i in range(len(self.__cache)):
-            if self.__cache[i] == obj:
+            if self.__cache[i].id_ == obj.id_:
                 self.__cache[i] = obj
                 self.__dump()
                 return
+  
+
+
+

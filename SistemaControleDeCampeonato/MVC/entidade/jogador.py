@@ -2,6 +2,7 @@ from .pessoa import Pessoa
 from .posicao import Posicao
 
 class Jogador(Pessoa):
+
     def __init__(self, nome, posicao: Posicao, funcao = 'Jogador', time = None):
         super().__init__(nome, funcao)
         self.__gols_marcados = 0
@@ -59,4 +60,5 @@ class Jogador(Pessoa):
             return super().__str__() + f"""; posição: {self.posicao}; time atual: {self.time.nome}; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
         else:
             return super().__str__() + f"""; posição: {self.posicao}; time atual: sem time; gols marcados: {self.__gols_marcados}; gols concedidos: {self.gols_concedidos}"""
+
 

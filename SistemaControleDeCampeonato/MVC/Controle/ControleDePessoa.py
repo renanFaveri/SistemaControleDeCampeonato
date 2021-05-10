@@ -15,57 +15,74 @@ from MVC.entidade.brando import Brando
 from MVC.entidade.moderado import Moderado
 from MVC.entidade.severo import Severo
 from MVC.entidade.arbitro import Arbitro
+from MVC.entidade.arbitroDao import ArbitroDAO
 from MVC.entidade.tecnico import Tecnico
+from MVC.entidade.tecnicoDao import TecnicoDAO
 from MVC.entidade.jogador import Jogador
 from MVC.entidade.jogadorDao import JogadorDAO
 from MVC.limite.tela import Tela
-from MVC.limite.telaDePessoa import TelaDePessoas
+from MVC.limite.telaDePessoa import TelaDePessoa
 from MVC.exceptionLista import ListaError
 from MVC.exceptionDadosIndisponivel import DadoIndisponivelError
 from MVC.exceptionVazia import EntradaVaziaError
 
     
 class ControladorDePessoas(ControladorDeEntidade):
-    
+
     def __init__(self, controlador_master):
-        self.__controlador_master = controlador_master
+        super().__init__(controlador_master)
         self.__posicoes = {1: Goleiro(), 2: Defensor(), 3: MeioCampista(), 4: Atacante()}
         self.__mentalidades = {1: Defensiva(), 2: Moderada(), 3: Ofensiva()}
         self.__rigidez = {1: Brando(), 2: Moderado(), 3: Severo()}
-        self.__jogador_DAO = JogadorDAO()
-        self.__tecnicos_registrados = []
-        self.__arbitros_registrados = [Arbitro('Margarida', self.__rigidez[3])]
-        self.__tela = TelaDePessoas(self)
-
-    @property
-    def jogador_DAO(self):
-        return self.__jogador_DAO.cache
+        self.__jogadores_DAO = JogadorDAO()
+        self.__tecnicos_DAO = TecnicoDAO()
+        self.__arbitros_DAO = ArbitroDAO()
+        self.__tela = TelaDePessoa(self)
 
     @property
     def tela(self):
         return self.__tela
 
+    @property
+    def jogador_dao(self):
+        return self.__jogadores_DAO
+
+    @property
+    def tecnico_dao(self):
+        return self.__tecnicos_DAO
+
+    @property
+    def arbitro_dao(self):
+        return self.__arbitros_DAO
+    
     @tela.setter
     def tela(self, tela):
         if isinstance(tela, Tela):
             self.__tela = tela
-
+            
     @property
     def tecnicos_registrados(self):
-        return self.__tecnicos_registrados
-
+        self.tecnico_dao.carregar()
+        return self.__tecnicos_DAO.cache
+    
+    @property
+    def jogadores_registrados(self):
+        self.jogador_dao.carregar()
+        return self.__jogadores_DAO.cache
+    
     @property
     def arbitros_registrados(self):
-        return self.__arbitros_registrados
-
+        self.arbitro_dao.carregar()
+        return self.__arbitros_DAO.cache
+    
     @property
     def posicoes(self):
         return self.__posicoes
-
+    
     @property
     def mentalidades(self):
         return self.__mentalidades
-
+    
     @property
     def rigidez(self):
         return self.__rigidez
@@ -75,20 +92,20 @@ class ControladorDePessoas(ControladorDeEntidade):
                 'rigidez': [self.rigidez[chave].rigidez for chave in self.rigidez]}
 
     def listar_nomes_arbitros(self):
-        return [arbitro.nome for arbitro in self.__arbitros_registrados]
+        return [arbitro.nome for arbitro in self.arbitros_registrados]
 
     def listar_nomes_tecnicos(self):
-        return [tecnico.nome for tecnico in self.__tecnicos_registrados]
+        return [tecnico.nome for tecnico in self.tecnicos_registrados]
 
     def listar_nomes_jogadores(self):
-        return [jogador.nome for jogador in self.__jogador_DAO.cache]
+        return [jogador.nome for jogador in self.jogadores_registrados]
 
     def listar_gdma_disponiveis(self):
         g = []
         d = []
         m = []
         a = []
-        for jogador in self.__jogador_DAO.cache:
+        for jogador in self.jogadores_registrados:
             if not jogador.time or jogador.time == '':
                 if jogador.posicao.posicao == 'Goleiro':
                     g.append(jogador.nome)
@@ -109,7 +126,6 @@ class ControladorDePessoas(ControladorDeEntidade):
         for i in range(len(self.__posicoes)):
             if self.__posicoes[i+1].posicao == nome_posicao:
                 encontrou = self.__posicoes[i+1]
-                print(encontrou)
         if encontrou:
             return encontrou
         else:
@@ -134,15 +150,15 @@ class ControladorDePessoas(ControladorDeEntidade):
             return encontrou
         else:
             raise EntradaVaziaError()
-
+    
     def cadastrar(self): 
         while True:
-            self.tela.tela_cadastrar_pessoas(self.dict_dados())
+            self.tela.menu_cadastrar(self.dict_dados())
             botao, valores = self.tela.abreTela()
             try:
                 if botao == 'Confirmar':
                     if valores['jogador']:
-                        nome_jogador = self.tela.strip_str(valores['jogador_nome']).title()
+                        nome_jogador = self.tela.strip_str(valores['jogador_nome'])
                         str_posicao = valores['posicao']
                         posicao = self.pegar_posicao(str_posicao)
                         if nome_jogador in self.listar_nomes_jogadores():
@@ -150,12 +166,12 @@ class ControladorDePessoas(ControladorDeEntidade):
                         if nome_jogador == '' or not posicao:
                             raise EntradaVaziaError()
                         jogador = Jogador(nome_jogador, posicao)
-                        botao = self.tela.popup_confirmar_cadastro((jogador.nome, jogador.funcao, jogador.posicao.posicao))
+                        botao = self.tela.popup_confirmar_cadastro()
                         if botao == 'Confirmar':
-                            self.__jogador_DAO.add(jogador)
+                            self.__jogadores_DAO.add(jogador)
                             self.tela.popup_cadastro_criado()
                     elif valores['tecnico']:
-                        nome_tecnico = self.tela.strip_str(valores['tecnico_nome']).title()
+                        nome_tecnico = self.tela.strip_str(valores['tecnico_nome'])
                         str_mentalidade = valores['mentalidade']
                         mentalidade = self.pegar_mentalidade(str_mentalidade)
                         if nome_tecnico in self.listar_nomes_tecnicos():
@@ -163,12 +179,12 @@ class ControladorDePessoas(ControladorDeEntidade):
                         elif nome_tecnico == '' or not mentalidade:
                             raise EntradaVaziaError()
                         tecnico = Tecnico(nome_tecnico, mentalidade)
-                        botao = self.tela.popup_confirmar_cadastro((tecnico.nome, tecnico.funcao, tecnico.mentalidade.mentalidade))
+                        botao = self.tela.popup_confirmar_cadastro()
                         if botao == 'Confirmar':
-                            self.__tecnicos_registrados.append(tecnico)
+                            self.__tecnicos_DAO.add(tecnico)
                             self.tela.popup_cadastro_criado()
                     elif valores['arbitro']:
-                        nome_arbitro = self.tela.strip_str(valores['arbitro_nome']).title()
+                        nome_arbitro = self.tela.strip_str(valores['arbitro_nome'])
                         str_rigidez = valores['rigidez']
                         rigidez = self.pegar_rigidez(str_rigidez)
                         if nome_arbitro in self.listar_nomes_arbitros():
@@ -176,9 +192,9 @@ class ControladorDePessoas(ControladorDeEntidade):
                         elif nome_arbitro == '' or not rigidez:
                             raise EntradaVaziaError()
                         arbitro = Arbitro(nome_arbitro, rigidez)
-                        botao = self.tela.popup_confirmar_cadastro((arbitro.nome, arbitro.funcao, arbitro.rigidez.rigidez))
+                        botao = self.tela.popup_confirmar_cadastro()
                         if botao == 'Confirmar':
-                            self.__arbitros_registrados.append(arbitro)
+                            self.__arbitros_DAO.add(arbitro)
                             self.tela.popup_cadastro_criado()
                     else:
                         raise EntradaVaziaError()                    
@@ -187,8 +203,7 @@ class ControladorDePessoas(ControladorDeEntidade):
             except ValueError:
                 self.tela.popup_msg_erro_cadastro()
             except DadoIndisponivelError:
-                #fazer popup 'já existe um cadastro com essas informações
-                self.tela.popup_msg_erro_cadastro()
+                self.tela.popup_msg_erro_dado_indisponivel()
             except EntradaVaziaError:
                 self.tela.popup_msg_erro_cadastro()
             finally:
@@ -201,13 +216,13 @@ class ControladorDePessoas(ControladorDeEntidade):
 
     def buscar(self):
         while True:
-            self.tela.menu_buscar_pessoas(self.listar_nomes_jogadores(), self.listar_nomes_tecnicos(), self.listar_nomes_arbitros())
+            self.tela.menu_buscar(self.listar_nomes_jogadores(), self.listar_nomes_tecnicos(), self.listar_nomes_arbitros())
             botao, valores = self.tela.abreTela()
             try:
                 if botao == 'Confirmar':
                     if valores['jogador']:
                         nome_jogador = self.tela.selecionar_entradas((valores['in_jnome'], valores['lst_jnome']))
-                        jogador = self.buscar_nome(self.__jogador_DAO.cache, nome_jogador)
+                        jogador = self.buscar_nome(self.jogadores_registrados, nome_jogador)
                         if not jogador:
                             raise EntradaVaziaError()
                         else:
@@ -239,12 +254,12 @@ class ControladorDePessoas(ControladorDeEntidade):
                 self.tela.popup_msg_erro_cadastro()
             finally:
                 self.tela.fechaTela()
-
+                                
     def alterar(self, cadastro):
         while True:
             try:
                 if isinstance(cadastro, Jogador):
-                    jogador = cadastro
+                    jogador = self.buscar_nome(self.jogadores_registrados, cadastro.nome)
                     dados = {'nome': jogador.nome, 'funcao': jogador.funcao, 'time': jogador.time.nome if jogador.time else '', 'posicao': jogador.posicao.posicao, 
                             'gols_m': jogador.gols_marcados, 'gols_c': jogador.gols_concedidos}
                     lista_posicoes = self.dict_dados()['posicoes']
@@ -254,20 +269,22 @@ class ControladorDePessoas(ControladorDeEntidade):
                         if valores['nome_jogador'] != jogador.nome or valores['posicao'] != jogador.posicao.posicao:
                             botao = self.tela.popup_confirmar_alteracao()
                             if botao == 'Confirmar':
-                                jogador.posicao = self.pegar_posicao(valores['posicao'])
-                                indisponivel = self.buscar_nome(self.__jogador_DAO.cache, valores['nome_jogador'])
-                                if indisponivel:
+                                indisponivel = self.buscar_nome(self.jogadores_registrados, valores['nome_jogador'])
+                                if indisponivel and jogador.id_ != indisponivel.id_:
                                     raise DadoIndisponivelError()
                                 else:
-                                    jogador.nome = valores['nome_jogador']
-                                    self.__jogador_DAO.atualizar(jogador)
+                                    jogador.nome = self.tela.strip_str(valores['nome_jogador'])
+                                    jogador.posicao = self.pegar_posicao(valores['posicao'])
+                                    jogador.time = self.cm.ct.buscar_nome(dados['time'])
+                                    self.jogador_dao.atualizar_objeto(jogador)
+                        cadastro = jogador
                     elif botao == 'excluir':
-                        return self.excluir(jogador) and self.__jogador_DAO.remove(jogador)
+                        return self.excluir(jogador)
                     else:
                         return
                 elif isinstance(cadastro, Tecnico):
-                    tecnico = cadastro
-                    dados = {'nome': tecnico.nome, 'funcao': tecnico.funcao, 'mentalidade': tecnico.mentalidade.mentalidade}
+                    tecnico = self.buscar_nome(self.tecnicos_registrados, cadastro.nome)
+                    dados = {'nome': tecnico.nome, 'funcao': tecnico.funcao, 'mentalidade': tecnico.mentalidade.mentalidade, 'time': tecnico.time.nome if tecnico.time else ''}
                     lista_mentalidades = self.dict_dados()['mentalidades']
                     self.tela.janela_tecnico(dados, lista_mentalidades)
                     botao, valores = self.tela.abreTela()
@@ -275,18 +292,21 @@ class ControladorDePessoas(ControladorDeEntidade):
                         if valores['nome_tecnico'] != tecnico.nome or valores['mentalidade'] != tecnico.mentalidade.mentalidade:
                             botao = self.tela.popup_confirmar_alteracao()
                             if botao == 'Confirmar':
-                                tecnico.mentalidade = self.pegar_mentalidade(valores['mentalidade'])
                                 indisponivel = self.buscar_nome(self.tecnicos_registrados, valores['nome_tecnico'])
-                                if indisponivel:
+                                if indisponivel and tecnico.id_ != indisponivel.id_:
                                     raise DadoIndisponivelError()
                                 else:
-                                    tecnico.nome = valores['nome_tecnico']
+                                    tecnico.nome = self.tela.strip_str(valores['nome_tecnico'])
+                                    tecnico.mentalidade = self.pegar_mentalidade(valores['mentalidade'])
+                                    tecnico.time = self.cm.ct.buscar_nome(dados['time'])
+                                    self.tecnico_dao.atualizar_objeto(tecnico)
+                        cadastro = tecnico
                     elif botao == 'excluir':
                         return self.excluir(tecnico)
                     else:
                         return
                 elif isinstance(cadastro, Arbitro):
-                    arbitro = cadastro
+                    arbitro = self.buscar_nome(self.arbitros_registrados, cadastro.nome)
                     dados = {'nome': arbitro.nome, 'funcao': arbitro.funcao, 'rigidez': arbitro.rigidez}
                     lista_rigidez = self.dict_dados()['rigidez']
                     self.tela.janela_arbitro(dados, lista_rigidez)
@@ -295,12 +315,14 @@ class ControladorDePessoas(ControladorDeEntidade):
                         if valores['nome_arbitro'] != arbitro.nome or valores['rigidez'] != arbitro.rigidez.rigidez:
                             botao = self.tela.popup_confirmar_alteracao()
                             if botao == 'Confirmar':
-                                arbitro.rigidez = valores['rigidez']
                                 indisponivel = self.buscar_nome(self.arbitros_registrados, valores['nome_arbitro'])
-                                if indisponivel:
+                                if indisponivel and arbitro.id_ != indisponivel.id_:
                                     raise DadoIndisponivelError()
                                 else:
-                                    arbitro.nome = valores['nome_arbitro']
+                                    arbitro.nome = self.tela.strip_str(valores['nome_arbitro'])
+                                    arbitro.rigidez = valores['rigidez']
+                                    self.arbitro_dao.atualizar_objeto(arbitro)
+                        cadastro = arbitro
                     elif botao == 'excluir':
                         return self.excluir(arbitro)
                     else:
@@ -310,37 +332,33 @@ class ControladorDePessoas(ControladorDeEntidade):
             except EntradaVaziaError:
                 self.tela.popup_msg_erro_cadastro()
             except DadoIndisponivelError:
-                #fazer popup 'já existe um cadastro com essas informações
-                self.tela.popup_msg_erro_cadastro()
+                self.tela.popup_msg_erro_dado_indisponivel()
             except TypeError:
                 self.tela.popup_msg_erro_cadastro()
             finally:
                 self.tela.fechaTela()
-
+                            
 
     def listar(self, opcao = None):
         pass
-
-
+   
     def excluir(self, cadastro):
         botao = self.tela.popup_msg_excluir()
         if botao == 'Confirmar':
             if isinstance(cadastro, Jogador):
-                lista = self.__jogador_DAO.cache
                 time = cadastro.time
-                if not time == None or time != '':
+                if time != None and time != '':
                     time.remover_jogadores([cadastro])
-                    #OBS: Atualizar persistencia de time 
-                lista.remove(cadastro)
+                    self.cm.ct.time_dao.atualizar_objeto(time)
+                self.__jogadores_DAO.remover_e_retornar(cadastro)
             elif isinstance(cadastro, Tecnico):
-                lista = self.__tecnicos_registrados
                 time = cadastro.time
-                if not time == None or time != '':
+                if time != None and time != '':
                     time.tecnico = None
-                lista.remove(cadastro)
+                    self.cm.time_dao.atualizar_objeto(time)
+                self.__tecnicos_DAO.remover_e_retornar(cadastro)
             elif isinstance(cadastro, Arbitro):
-                lista = self.__arbitros_registrados
-                lista.remove(cadastro)
+                self.__arbitros_DAO.remover_e_retornar(cadastro)
             self.tela.popup_cadastro_excluido()
         return
 
@@ -358,3 +376,6 @@ class ControladorDePessoas(ControladorDeEntidade):
                         opcoes[key]()
             else:
                 tela = False
+
+
+    

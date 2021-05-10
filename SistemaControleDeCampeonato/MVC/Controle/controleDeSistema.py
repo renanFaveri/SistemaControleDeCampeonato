@@ -2,21 +2,20 @@ from .ControleDePessoa import ControladorDePessoas
 from .controleDeTime import ControladorDeTimes
 from .controleDeCampeonato import ControladorDeCampeonatos
 from .controleJogarCampeonato import JogarCampeonato
-from MVC.limite.telaInicial import TelaInicial
+from MVC.limite.telaInicial import TelaInicio
 from MVC.limite.tela import Tela
 
 
-class ControladorDeSistemas():
-    
+class ControladorDeSistemas:
+
     def __init__(self):
         self.__controlador_pessoas = ControladorDePessoas(self)    
         self.__controlador_times = ControladorDeTimes(self)            
         self.__controlador_campeonatos = ControladorDeCampeonatos(self)
         self.__jogar_campeonato = JogarCampeonato(self)
-        self.__tela = TelaInicial(self)
+        self.__tela = TelaInicio(self)
         
     def iniciar(self):
-        #jogando = True
         while True:
             opcoes = {'cp': self.cp.abre_tela, 'ct': self.ct.abre_tela, 'cc': self.cc.abre_tela, 'jpc': self.jc.abre_tela}
             self.tela.exibir_menu()
@@ -51,4 +50,5 @@ class ControladorDeSistemas():
     @property
     def jc(self):
         return self.__jogar_campeonato
-           
+        
+    

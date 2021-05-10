@@ -1,23 +1,24 @@
 import random
 from MVC.exceptionTime import TimeIncompletoError
 from MVC.exceptionVazia import EntradaVaziaError
-from MVC.limite.telaDePartidas import TelaDePartidas
+from MVC.limite.telaDePartidas import TelaDePartida
 from MVC.limite.tela import Tela
 from .controleDeCampeonato import ControladorDeCampeonatos
 from .controleDeTime import ControladorDeTimes
+from .ControleDePessoa import ControladorDePessoas
 from MVC.entidade.time import Time
 from MVC.entidade.arbitro import Arbitro
 from MVC.entidade.partida import Partida
 from MVC.entidade.goleiro import Goleiro
+from MVC.entidade.partidaDao import PartidasDAO
 
 
-
-class JogarCampeonato:
+class JogarCampeonato():
     
     def __init__(self, controlador_master):
         self.__controlador_master = controlador_master
-        self.__tela = TelaDePartidas(self)
-        self.__partidas = [Partida(self.__controlador_master.cp.arbitros_registrados[0], self.__controlador_master.ct.time_DAO[0], self.__controlador_master.ct.time_DAO[1])]
+        self.__tela = TelaDePartida(self)
+        self.__partidas_DAO = PartidasDAO()
     
     @property
     def cm(self):
@@ -26,22 +27,42 @@ class JogarCampeonato:
     @property
     def tela(self):
         return self.__tela
-
+    
     @tela.setter
     def tela(self, tela):
         if isinstance(tela, Tela):
             self.__tela = tela
 
     @property
+    def partidas_dao(self):
+        return self.__partidas_DAO
+
+    @property
     def partidas(self):
-        return self.__partidas
-    
+        self.partidas_dao.carregar()
+        return self.__partidas_DAO.cache
+
+    def buscar_partida(self, partida):
+        for i in range(len(self.partidas)):
+            if partida.id_ == self.partidas[i].id_:
+                return self.partidas[i].id_
+
+    def atualizar_informacoes(self):
+        for time in self.cm.ct.times_registrados:
+            self.cm.ct.carregar_jogadores(time)
+            self.cm.ct.time_dao.atualizar_objeto(time)
+        for campeonato in self.cm.cc.campeonatos_registrados:
+            self.cm.cc.carregar_times(campeonato)
+            self.cm.cc.atualizar_partidas(campeonato)
+            self.cm.cc.campeonato_dao.atualizar_objeto(campeonato)
+
     
     def jogar_amistoso(self):
         while True:
+            self.atualizar_informacoes()
             lista_times = self.cm.ct.listar_nomes_times()
             lista_arbitros = self.cm.cp.listar_nomes_arbitros()
-            self.tela.menu_criar_partida(lista_times,lista_arbitros)
+            self.tela.menu_cadastrar(lista_times,lista_arbitros)
             botao, valores = self.tela.abreTela()
             if botao == 'Confirmar':
                 time_anfitriao = self.tela.selecionar_entradas((valores['in_anf'], valores['lst_anf']))
@@ -49,7 +70,7 @@ class JogarCampeonato:
                     time_anfitriao = self.cm.ct.buscar_nome(time_anfitriao)
                 time_visitante = self.tela.selecionar_entradas((valores['in_vis'], valores['lst_vis']))
                 if time_visitante != None:
-                    time_visitante = self.cm.ct.buscar_nome(time_visitante)                    
+                    time_visitante = self.cm.ct.buscar_nome(time_visitante)
                 arbitro_designado = self.tela.selecionar_entradas((valores['in_arb'], valores['lst_arb']))
                 if arbitro_designado != None:
                     arbitro_designado = self.cm.cp.buscar_nome(nome=arbitro_designado, lista=self.cm.cp.arbitros_registrados)
@@ -61,27 +82,29 @@ class JogarCampeonato:
                     if (len(time_anfitriao.jogadores) < time_anfitriao.min_jogadores) or (len(time_visitante.jogadores) < time_visitante.min_jogadores):
                         raise TimeIncompletoError()
                     else:
+                        time_anfitriao = self.cm.ct.time_dao.get(time_anfitriao)
+                        time_visitante = self.cm.ct.time_dao.get(time_visitante)
+                        arbitro_designado = self.cm.cp.arbitro_dao.get(arbitro_designado)
                         partida = Partida(time_anfitriao, time_visitante, arbitro_designado)
-                        botao = self.tela.popup_confirmacao_partida(f'{partida}')
+                        botao = self.tela.popup_confirmar_cadastro(f'{partida}')
                         if botao == 'Confirmar':
-                            self.__p.append(partida)      
+                            self.partidas_dao.add(partida)
                             self.tela.fechaTela()
-                            return self.jogar(partida)
+                            return self.jogar(partida)       
                 else:
                     raise EntradaVaziaError()
             except EntradaVaziaError:
-                self.tela.popup_msg_erro_partida()
+                self.tela.popup_msg_erro_cadastro()
             except TimeIncompletoError:
-                self.tela.popup_msg_erro_partida()
+                self.tela.popup_erro_time_incompleto()
             finally:
                 self.tela.fechaTela()
 
-    
-    
     def criar_partidas(self):
+        self.atualizar_informacoes()
         while True:
             lista_campeonatos = self.cm.cc.listar_nomes_campeonatos()
-            self.tela.menu_criar_partidas_camp(lista_campeonatos)
+            self.tela.menu_cadastrar_partidas(lista_campeonatos)
             botao, valores = self.tela.abreTela()
             try:
                 if botao != 'Confirmar':
@@ -90,16 +113,17 @@ class JogarCampeonato:
                 else:
                     sem_campeonato = valores['check']
                     if sem_campeonato:
-                        lista = self.cm.ct.time_DAO
+                        lista = self.cm.ct.times_registrados
                         nome_campeonato = ''
                     else:
                         nome_campeonato = self.tela.selecionar_entradas((valores['in_camp'], valores['lst_camp']))
-                        campeonato = self.cm.cc.buscar_nome(nome_campeonato)
+                        camp = self.cm.cc.buscar_nome(nome_campeonato)
+                        campeonato = self.cm.cc.campeonato_dao.get(camp)
                         if not campeonato:
                             raise EntradaVaziaError()
                         else:
                             lista = campeonato.times
-                    botao = self.tela.popup_confirmacao_partidas(len(lista), nome_campeonato)
+                    botao = self.tela.popup_confirmar_partidas(len(lista), nome_campeonato)
                     if botao != 'Confirmar':
                         self.tela.fechaTela()
                         return self.criar_partidas()
@@ -109,7 +133,7 @@ class JogarCampeonato:
                         for time1 in lista:
                             for time2 in lista:
                                 if isinstance(time1, Time) and isinstance(time2, Time):
-                                    if (len(time1.jogadores) >= time1.min_jogadores) and (len(time2.jogadores) >= time2.min_jogadores):
+                                    if (len(time1.jogadores) >= time1.min_jogadores) and (len(time2.jogadores) >= time2.min_jogadores) and len(arbitros) > 0:
                                         if (time1 != time2):
                                             i = random.randrange(len(arbitros))
                                             arbitro = arbitros[i]
@@ -121,12 +145,13 @@ class JogarCampeonato:
                                     raise EntradaVaziaError()
                         if not sem_campeonato:
                             campeonato.partidas.extend(partidas)
-                        self.partidas.extend(partidas)
+                            self.cm.cc.campeonato_dao.atualizar_objeto(campeonato)
+                        self.partidas_dao.extend(partidas)
                     return partidas
             except EntradaVaziaError:
                 self.tela.popup_msg_erro_partidas()
             except TimeIncompletoError:
-                self.tela.popup_msg_erro_partidas()
+                self.tela.popup_erro_time_incompleto()
             finally:
                 self.tela.fechaTela()
     
@@ -156,7 +181,7 @@ class JogarCampeonato:
             while len(lj) < gols:
                 j = random.randrange(len(time.jogadores))
                 jg = time.jogadores[j]
-                if jg.posicao.posicao is not Goleiro().posicao:
+                if jg.posicao.posicao != Goleiro().posicao:
                     lj.append(jg)
             return lj
                 
@@ -198,9 +223,8 @@ class JogarCampeonato:
             time.gols_marcados += gols_p
             time.gols_sofridos += gols_c
 
-
-        ta = partida.time_anfitriao
-        tv = partida.time_visitante
+        ta = self.cm.ct.time_dao.get(partida.time_anfitriao)
+        tv = self.cm.ct.time_dao.get(partida.time_visitante)
         gols_a = sort_gols()
         gols_v = sort_gols()
         placar = f'{gols_a} x {gols_v}'
@@ -218,25 +242,33 @@ class JogarCampeonato:
         rel_partida = [(partida.id_),(ta, gols_a, marc_a),(tv, gols_v, marc_v)]
         partida.relatorio = rel_jog_gol
         partida.gerar_sumula(rel_jog_gol)
-        self.tela.janela_final_partida(partida.dict_dados(), ta.dict_dados(), tv.dict_dados())
         partida.jogada = True
-
-    def jogar(self, partida: Partida, multiplas_partidas = False):
+        self.cm.ct.atualizar_jogadores(ta)
+        self.cm.ct.atualizar_jogadores(tv)
+        self.cm.ct.time_dao.atualizar_objeto(ta)
+        self.cm.ct.time_dao.atualizar_objeto(tv)
+ 
+    def jogar(self, partida: Partida, multiplas_partidas = False, campeonato = None):
         if not multiplas_partidas:
             self.tela.janela_inicio_partida(partida.dict_dados(), partida.time_anfitriao.dict_dados(), partida.time_visitante.dict_dados())
             botao, valores = self.tela.abreTela()
             self.tela.fechaTela()
             if botao == 'Jogar':
                 self.jogar_partida(partida)
+                self.tela.janela_final_partida(partida.dict_dados(), partida.time_anfitriao.dict_dados(), partida.time_visitante.dict_dados())
                 self.tela.abreTela()
                 self.tela.fechaTela()
         else:
             self.jogar_partida(partida)
-        return
+        self.partidas_dao.atualizar_objeto(partida)
+        if campeonato:
+            campeonato = self.cm.cc.campeonato_dao.get(campeonato)
+            self.cm.cc.carregar_times(campeonato)
+            self.cm.cc.campeonato_dao.atualizar_objeto(campeonato)
         
-
     def jogar_camp(self):
         while True:
+            self.atualizar_informacoes()
             lista_campeonatos = self.cm.cc.listar_nomes_campeonatos()
             self.tela.menu_jogar_camp(lista_campeonatos)
             botao, valores = self.tela.abreTela()
@@ -265,20 +297,22 @@ class JogarCampeonato:
                         self.tela.fechaTela()
                     else:
                         self.tela.fechaTela()
-                        partidas_jogadas = []
                         for partida in partidas:
-                            self.jogar(partida, True)
-                            partidas_jogadas.append(partida)
+                            self.jogar(partida, True, campeonato)
                         return  self.ver_partidas_campeonato(partidas)
             except EntradaVaziaError:
                 self.tela.popup_msg_erro_partidas()
                 self.tela.fechaTela()
+            else:
+                self.cm.cc.campeonato_dao.atualizar_objeto(campeonato)
+            finally:
+                self.tela.fechaTela()
 
-    
+
     def ver_partidas_campeonato(self, partidas):
         txt_partidas = [f'{partida}' for partida in partidas] 
         while True:
-            self.tela.mostrar_partidas_campeonato(txt_partidas)
+            self.tela.menu_listar(txt_partidas)
             botao, valores = self.tela.abreTela()
             janela_aux = self.tela.janela
             try:
@@ -295,11 +329,10 @@ class JogarCampeonato:
                 self.tela.janela = janela_aux
                 self.tela.fechaTela()
 
-
     def ver_partidas_jogadas(self):
         while True:
             lista_campeonatos = self.cm.cc.listar_nomes_campeonatos()
-            self.tela.menu_mostrar_partidas(lista_campeonatos)
+            self.tela.menu_buscar(lista_campeonatos)
             botao, valores = self.tela.abreTela()
             self.tela.fechaTela()
             try:
@@ -329,7 +362,6 @@ class JogarCampeonato:
             finally:
                 self.tela.fechaTela()
 
- 
     def abre_tela(self):
         tela = True
         while tela:
@@ -341,4 +373,4 @@ class JogarCampeonato:
                 opcoes[botao]()
             else:
                 tela = False
-                          
+            

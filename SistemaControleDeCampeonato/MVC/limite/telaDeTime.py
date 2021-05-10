@@ -1,34 +1,10 @@
 import PySimpleGUI as sgui
+from .tela import Tela
 
-class TelaDeTimes:
+class TelaDeTime(Tela):
 
     def __init__(self, controlador):
-        self.__controlador = controlador
-        self.__janela = None
-
-    @property
-    def janela(self):
-        return self.__janela
-
-    @janela.setter
-    def janela(self, janela):
-        if isinstance(janela, sgui.Window):
-            self.__janela = janela
-        else:
-            raise TypeError
-
-    @property
-    def ctrl(self):
-        return self.__controlador
-
-
-    def abreTela(self):
-        return self.__janela.Read()
-
-
-    def fechaTela(self):
-        return self.__janela.Close()
-
+        super().__init__(controlador)
 
     def exibir_menu(self):
         background = '#20660C'
@@ -42,11 +18,10 @@ class TelaDeTimes:
                   [sgui.Button('Confirmar', size=(15,2), font=('Candara', 14), button_color=button_color, pad=((10,10), (30,60))),
                         sgui.Button('Voltar', size=(15, 2), font=('Candara', 14), button_color=button_color, pad=((10,10), (30,60)))]]
         window = sgui.Window('UFSC Programmers League', layout, background_color=background, element_justification='Center', finalize=True, keep_on_top = True)
-        self.__janela = window
+        self.janela = window
         return
 
-
-    def tela_cadastrar(self):
+    def menu_cadastrar(self):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -70,37 +45,10 @@ class TelaDeTimes:
                   [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))),
                         sgui.Button('Voltar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30)))]]
         window = sgui.Window('', layout, background_color=background, element_justification='left', finalize=True, keep_on_top = True)
-        self.__janela = window
+        self.janela = window
         return
 
-    def popup_msg_erro_cadastro(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text('Preencha os campos corretamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Text('Escolha novamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Button('OK', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color, pad=(0,20))]]
-        window = sgui.Window('Cartão Amarelo!'.upper(), layout, titlebar_font=('Candara', 14, 'bold'), background_color='#F3EE44', element_justification='Center', force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return
-
-    def popup_msg_excluir(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text('Você tem certeza que deseja excluir esse cadastro?', text_color='white', background_color='#ce221e', font=('Candara', 16, 'bold'))],
-                  [sgui.Text('A exclusão será irreversível!', text_color='white', background_color='#ce221e', font=('Candara', 16, 'bold'))],
-                  [sgui.Button('Confirmar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=('white', 'black'), pad=(10,20)),
-                    sgui.Button('Cancelar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=('white', 'black'), pad=(10,20))]] 
-        window = sgui.Window('Cartão Vermelho!'.upper(), layout, titlebar_font=('Candara', 14, 'bold'), background_color='#ce221e', element_justification='Center', force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return botao
-
-
-
-    def menu_buscar_times(self, lista_nome_times):
+    def menu_buscar(self, lista_nome_times):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -118,10 +66,10 @@ class TelaDeTimes:
                         sgui.Cancel('Voltar', size=(10,2), font=('Candara', 12,'bold'), button_color=button_color)],
                   [sgui.Text('', background_color=background, size=(0,4))]]
         window = sgui.Window('Buscar times', layout, background_color=background, finalize=True, element_padding=(10,10))
-        self.__janela = window
+        self.janela = window
         return
 
-    def listar_times(self, lista_nome_legenda_times):
+    def menu_listar(self, lista_nome_legenda_times):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -146,10 +94,10 @@ class TelaDeTimes:
         layer2 = [[sgui.Column([layer2], scrollable=True, vertical_scroll_only=True, background_color=background, element_justification='center', size=(1000,600))]]
         layout.append(layer2)          
         window = sgui.Window('Buscar times', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
-    def janela_time(self, time_dict_dados):
+    def menu_alterar(self, time_dict_dados):
         def ordenacao(lista_jogadores):
             g = []
             d = []
@@ -187,7 +135,6 @@ Gols marcados:\t\t{time_dict_dados['gols_m']}
 Gols sofridos:\t\t{time_dict_dados['gols_s']}
 Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
 
-
         header = [[sgui.Column(layout=[[sgui.Text(time_dict_dados['nome'].upper(), text_color=time_dict_dados['cor_s'], background_color=time_dict_dados['cor_p'], 
                         font=('Candara', 25, 'bold'), size=(50,1), justification='center')],
                         [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))), 
@@ -220,9 +167,11 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         col_botoes2 = [sgui.Column([botao_ctecnico, botao_dtecnico], background_color='#06470F')]
         frame_dados = [sgui.Frame('', layout = [col_botoes2 + frame_estatisticas + frame_jogadores + col_botoes1], background_color='#06470F')]
         botao_excluir = [sgui.Button('Declarar falência', size=(10,2), font=('Candara', 14), border_width=2, focus=True, button_color=('white', 'dark red'), key='excluir')]
-        layout = header +  [nome] + [cores] + [frame_dados] + [botao_excluir]
+        coluna = [sgui.Column(layout = [nome] + [cores] + [frame_dados] + [botao_excluir], element_justification='center', background_color=background, 
+                scrollable=True, vertical_scroll_only=True)]
+        layout = header +  [coluna]
         window = sgui.Window('Cadastro de time', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def tela_vender_jogador(self, lista_dados_jogadores):
@@ -240,7 +189,7 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         frame_jogadores = [sgui.Frame('Jogadores', layout = [lista_jogadores], title_color='#FAE98E', background_color='#06470F')]
         layout = header + [linha1] + [frame_jogadores]
         window = sgui.Window('Janela de mercado aberta', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def tela_contratar_jogador(self, lista_goleiro, lista_defensores, lista_meio_campistas, lista_atacantes):
@@ -268,7 +217,7 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         frame_jogadores = [sgui.Frame('Jogadores', layout = [frame_goleiros + frame_defensores, frame_meio_campistas + frame_atacantes], title_color='#FAE98E', background_color='#06470F')]
         layout = header + [linha1] + [frame_jogadores]
         window = sgui.Window('Janela de mercado aberta', layout, background_color=background, finalize=True, element_padding=(20,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def tela_contratar_tecnico(self, lista_tecnicos):
@@ -287,7 +236,7 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         frame = [sgui.Frame('', layout = [frame_tecnicos], title_color='#FAE98E', background_color='#06470F')]
         layout = header + [linha1] + [frame]
         window = sgui.Window('Chama o mister', layout, background_color=background, finalize=True, element_padding=(20,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def popup_confirmar_demissao(self, nome_tecnico):
@@ -317,7 +266,6 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         window.Close()
         return botao
 
-
     def popup_confirmar_compra(self, len_lista):
         n_jogadores = len_lista
         background = '#20660C'
@@ -331,42 +279,3 @@ Jogadores no time:\t\t{len(time_dict_dados['jogadores'])}"""
         botao, valores = window.Read()
         window.Close()
         return botao
-
-    def popup_confirmar_alteracao(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text(f'Foram feitas alterações no cadastro do time.\n Confirmar essas alterações?', size=(35,3), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
-                        border_width=(10), font=('Candara', 14, 'bold'), justification='c')],
-                  [sgui.Button('Confirmar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color), 
-                        sgui.Button('Cancelar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color)]]
-        window = sgui.Window('Confirmar alterações', layout, background_color=background, element_justification='Center', element_padding=(10,10), force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return botao
-
-
-    def selecionar_entradas(self, tupla: tuple):
-            if isinstance(tupla, tuple):
-                entrada1 = self.strip_str(tupla[0])
-                entrada2 = self.strip_str(tupla[1])
-                if entrada1 == entrada2:
-                    if entrada1 != '':
-                        return entrada1
-                else:
-                    if entrada1 != '':
-                        return entrada1
-                    else:
-                        return entrada2
-            else:
-                return
-
-
-    def strip_str(self, resposta):
-        aux = ''
-        resposta = resposta.split()
-        for n in resposta:
-            aux += n + ' '
-        resposta = aux.strip().title()
-        return resposta
-

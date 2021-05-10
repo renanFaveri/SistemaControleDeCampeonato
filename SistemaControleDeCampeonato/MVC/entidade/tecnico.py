@@ -3,7 +3,6 @@ from .mentalidade import Mentalidade
 
 class Tecnico(Pessoa):
 
-    
     def __init__(self, nome, mentalidade: Mentalidade, funcao = 'Técnico'):
         super().__init__(nome, funcao)
         self.__time = None
@@ -39,5 +38,8 @@ class Tecnico(Pessoa):
             return super().__str__() + f'; mentalidade: {self.mentalidade}; time atual: {self.time.nome}'
         else:
             return super().__str__() + f'; mentalidade: {self.mentalidade}; time atual: sem time'
+
+            
+   
 
            

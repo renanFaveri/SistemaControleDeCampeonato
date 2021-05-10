@@ -1,36 +1,10 @@
 import PySimpleGUI as sgui
+from .tela import Tela
 
+class TelaDeCampeonato(Tela):
 
-class TelaDeCampeonatos:
-    
     def __init__(self, controlador):
-        self.__controlador = controlador
-        self.__janela = None
-
-
-    @property
-    def janela(self):
-        return self.__janela
-
-    @janela.setter
-    def janela(self, janela):
-        if isinstance(janela, sgui.Window):
-            self.__janela = janela
-        else:
-            raise TypeError
-
-    @property
-    def ctrl(self):
-        return self.__controlador
-
-
-    def abreTela(self):
-        return self.__janela.Read()
-
-
-    def fechaTela(self):
-        return self.__janela.Close()
-
+        super().__init__(controlador)
 
     def exibir_menu(self):
         background = '#20660C'
@@ -44,11 +18,10 @@ class TelaDeCampeonatos:
                   [sgui.Button('Confirmar', size=(15,2), font=('Candara', 14), button_color=button_color, pad=((10,10), (30,60))),
                         sgui.Button('Voltar', size=(15, 2), font=('Candara', 14), button_color=button_color, pad=((10,10), (30,60)))]]
         window = sgui.Window('UFSC Programmers League', layout, background_color=background, element_justification='Center', finalize=True, keep_on_top = True)
-        self.__janela = window
+        self.janela = window
         return
 
-
-    def tela_cadastrar(self):
+    def menu_cadastrar(self):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -65,24 +38,10 @@ class TelaDeCampeonatos:
                   [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))),
                         sgui.Button('Voltar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30)))]]
         window = sgui.Window('', layout, background_color=background, element_justification='left', finalize=True, keep_on_top = True)
-        self.__janela = window
+        self.janela = window
         return
 
-
-    def popup_msg_erro_cadastro(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text('Preencha os campos corretamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Text('Escolha novamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Button('OK', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color, pad=(0,20))]]
-        window = sgui.Window('Cartão Amarelo!'.upper(), layout, titlebar_font=('Candara', 14, 'bold'), background_color='#F3EE44', element_justification='Center', force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return
-
-
-    def menu_buscar_campeonatos(self, lista_campeonatos):
+    def menu_buscar(self, lista_campeonatos):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -100,11 +59,10 @@ class TelaDeCampeonatos:
                         sgui.Cancel('Voltar', size=(10,2), font=('Candara', 12,'bold'), button_color=button_color)],
                   [sgui.Text('', background_color=background, size=(0,4))]]
         window = sgui.Window('Buscar campeonatos', layout, background_color=background, finalize=True, element_padding=(10,10))
-        self.__janela = window
+        self.janela = window
         return
 
-
-    def listar_campeonatos(self, lista_campeonatos):
+    def menu_listar(self, lista_campeonatos):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -130,20 +88,19 @@ class TelaDeCampeonatos:
         layer2 = [[sgui.Column([layer2], scrollable=True, vertical_scroll_only=True, background_color=background, element_justification='center', size=(1000,600))]]
         layout.append(layer2)          
         window = sgui.Window('Buscar campeonatos', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
-
-    def janela_campeonato(self, camp_dict_dados):
+    def menu_alterar(self, camp_dict_dados):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
 
-        header = [[sgui.Column(layout=[[sgui.Text(camp_dict_dados['nome'].upper(), text_color='#FAE98E', background_color=background, font=('Candara', 25, 'bold'), size=(50,1), justification='center')],
+        header = [[sgui.Column(layout=[[sgui.Text(camp_dict_dados['nome'].upper(), text_color='#FAE98E', background_color=background,
+                        font=('Candara', 25, 'bold'), size=(50,1), justification='center')],
                         [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))), 
                         sgui.Button('Voltar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30)))]], 
                   element_justification='center', vertical_alignment='c', background_color=background)]]
-
         nome = [sgui.Frame('Alterar nome do campeonato', font=('Candara', 12,'bold'), title_color='#FAE98E', background_color='#06470F',
                         layout=[[sgui.Column(vertical_alignment='b', background_color='#06470F', size=(1000,40), 
                                 layout=[[sgui.Text('Nome:', size=(50,0), background_color='#06470F', font=('Candara', 12,'bold')), 
@@ -151,19 +108,18 @@ class TelaDeCampeonatos:
         n_times = [sgui.Frame('Alterar o número de times competidos', font=('Candara', 12,'bold'), title_color='#FAE98E', background_color='#06470F', pad=(20,15),
                         layout=[[sgui.Slider(range=(2,20), size=(100,30), orientation='horizontal', background_color='#06470F', trough_color=background, 
                                 font=('Candara', 12, 'bold'), default_value=camp_dict_dados['n_times'], key='n_times')]])]
-
         classificacao = [sgui.Multiline(camp_dict_dados['tabela'], text_color='white', font=(12), background_color=background, size=(60,11), disabled=True)]
         frame_classificacao = [sgui.Frame('Tabela', layout=[classificacao], title_color='#FAE98E', background_color='#06470F')]
-
         botao_adicionar = [sgui.Button('Adicionar times', size=(15,3), font=('Candara', 14,'bold'), border_width=6, focus=True, button_color=('white', '#01c906'), key='adicionar')]
         botao_remover = [sgui.Button('Remover times', size=(15,3), font=('Candara', 14,'bold'), border_width=6, focus=True, button_color=('white', '#ff9f11'), key='remover')]
         col_botoes = [sgui.Column([botao_adicionar, botao_remover], background_color='#06470F')]
         frame_dados = [sgui.Frame('', layout = [frame_classificacao + col_botoes], background_color='#06470F')]
         botao_excluir = [sgui.Button('Cancelar campeonato', size=(10,2), font=('Candara', 14), border_width=2, focus=True, button_color=('white', 'dark red'), key='excluir')]
-
-        layout = header + [nome] + [n_times] + [frame_dados] + [botao_excluir]
+        coluna = [sgui.Column(layout = [nome] + [n_times] + [frame_dados] + [botao_excluir], element_justification='center', background_color=background, 
+                scrollable=True, vertical_scroll_only=True)]
+        layout = header + [coluna]
         window = sgui.Window('Cadastro de time', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def tela_remover_times(self, lista_times_campeonato):
@@ -181,7 +137,7 @@ class TelaDeCampeonatos:
         frame_times = [sgui.Frame('Times', layout = [lista_times], title_color='#FAE98E', background_color='#06470F')]
         layout = header + [linha1] + [frame_times]
         window = sgui.Window('Janela de mercado aberta', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def tela_adicionar_times(self, lista_times_disponiveis):
@@ -197,12 +153,12 @@ class TelaDeCampeonatos:
                 background_color=background, size=(90,1), justification='left')]
         lista_times = [sgui.Listbox(sorted([time_nome for time_nome in lista_times_disponiveis]), select_mode=sgui.LISTBOX_SELECT_MODE_MULTIPLE, text_color='white', 
                             font=(12), background_color=background, size=(110,11), key='competidores')]
-
+        
         frame_interna_times = [sgui.Frame('Times', layout=[lista_times], title_color='#FAE98E', pad=((20,60),(10,20)), background_color='#06470F')]
         frame_times = [sgui.Frame('Jogadores', layout = [frame_interna_times], title_color='#FAE98E', background_color='#06470F')]
         layout = header + [linha1] + [frame_times]
         window = sgui.Window('Organizar campeonato', layout, background_color=background, finalize=True, element_padding=(20,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def popup_confirmar_adicao(self, n_times):
@@ -232,53 +188,4 @@ class TelaDeCampeonatos:
         botao, valores = window.Read()
         window.Close()
         return botao
-
-    def popup_confirmar_alteracao(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text(f'Foram feitas alterações no cadastro do campeonato.\n Confirmar essas alterações?', size=(35,3), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
-                        border_width=(10), font=('Candara', 14, 'bold'), justification='c')],
-                  [sgui.Button('Confirmar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color), 
-                        sgui.Button('Cancelar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color)]]
-        window = sgui.Window('Confirmar alterações', layout, background_color=background, element_justification='Center', element_padding=(10,10), force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return botao
-
-    def popup_erro_cadastro_cheio(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text('A quantidade de elementos selecionados excede a capacidade do cadastro', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Text('Escolha novamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Button('OK', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color, pad=(0,20))]]
-        window = sgui.Window('Cartão Amarelo!'.upper(), layout, titlebar_font=('Candara', 14, 'bold'), background_color='#F3EE44', element_justification='Center', force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return
-
-
-    def selecionar_entradas(self, tupla: tuple):
-            if isinstance(tupla, tuple):
-                entrada1 = self.strip_str(tupla[0])
-                entrada2 = self.strip_str(tupla[1])
-                if entrada1 == entrada2:
-                    if entrada1 != '':
-                        return entrada1
-                else:
-                    if entrada1 != '':
-                        return entrada1
-                    else:
-                        return entrada2
-            else:
-                return
-
-    def strip_str(self, resposta):
-        aux = ''
-        resposta = resposta.split()
-        for n in resposta:
-            aux += n + ' '
-        resposta = aux.strip().title()
-        return resposta
 

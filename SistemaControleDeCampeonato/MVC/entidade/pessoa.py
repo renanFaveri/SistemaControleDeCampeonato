@@ -34,7 +34,8 @@ class Pessoa(ABC):
     @funcao.setter
     def funcao(self, funcao):
         if isinstance(funcao, str):
-            self.__funcao =  funcao
-            
+            self.__funcao =  funcao       
+    
     def __str__(self):
         return f"""Nome: {self.nome}; ID: {self.__id}; função: {self.funcao}"""
+

@@ -1,34 +1,10 @@
 import PySimpleGUI as sgui
+from .tela import Tela
 
-class TelaDePartidas:
+class TelaDePartida(Tela):
     
     def __init__(self, controlador):
-        self.__janela = None
-        self.__controlador = controlador
-
-    @property
-    def janela(self):
-        return self.__janela
-
-    @janela.setter
-    def janela(self, janela):
-        if isinstance(janela, sgui.Window):
-            self.__janela = janela
-        else:
-            raise TypeError
-
-    @property
-    def ctrl(self):
-        return self.__controlador
-
-
-    def abreTela(self):
-        return self.__janela.Read()
-
-
-    def fechaTela(self):
-        return self.__janela.Close()
-
+        super().__init__(controlador)
 
     def exibir_menu(self):
         background = '#20660C'
@@ -44,9 +20,8 @@ class TelaDePartidas:
                     sgui.Button('Voltar', size=(20,3), font=('Candara', 14), button_color=button_color, pad=((10,10), (30,0)))],
                   [sgui.Text('', background_color=background, size=(0,4))]]
         window = sgui.Window('UFSC Programmers League', layout, background_color=background, element_justification='Center', finalize=True, keep_on_top = True)
-        self.__janela = window
+        self.janela = window
         return
-
 
     def janela_inicio_partida(self, dict_partida, dict_time_anf, dict_time_vis):
         background = '#20660C'
@@ -64,7 +39,7 @@ class TelaDePartidas:
                  [sgui.Column(col1x1, vertical_alignment='t', background_color=background), sgui.Column(col1x2, background_color=background, element_justification='center'), 
                     sgui.Column(col1x3, vertical_alignment='t', background_color=background, element_justification='right')]]
         window = sgui.Window('Teste', layout, background_color=background, size=(994, 314))
-        self.__janela = window
+        self.janela = window
         return
 
     def janela_final_partida(self, dict_partida, dict_time_anf, dict_time_vis):
@@ -83,7 +58,6 @@ class TelaDePartidas:
                     layout = [[sgui.Multiline(default_text=f"{dict_partida['txt_relatorio'][1]}", text_color='white', font=(12) , background_color=background, 
                     size=(48,8), disabled=True, no_scrollbar=True)]])]]  
         col3 = [[sgui.Button('Voltar ao menu principal', size=(20,3), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color, pad=((0,(20,0))), key = 'voltar')]]
-        
         layout =[[sgui.Menu([['Arquivo', ['Sair']]])],
                 [sgui.Text(f"Partida id {dict_partida['id']}", font=('Candara', 12,'bold'), text_color=text, background_color=background, size=(20,1), justification='left')],
                 [sgui.Text(f"Árbitro: {dict_partida['arb']}", font=('Candara', 12,'bold'), text_color=text, background_color=background, size=(20,2), justification='left')],
@@ -92,10 +66,10 @@ class TelaDePartidas:
                 [sgui.Column(col2x1, vertical_alignment='t', background_color=background), sgui.Column(col2x2, vertical_alignment='t', background_color=background, justification='center')],
                 [sgui.Column(col3, background_color=background, justification='center')]]
         window = sgui.Window('Teste', layout, background_color=background)
-        self.__janela = window
+        self.janela = window
         return
 
-    def menu_criar_partida(self, lista_times, lista_arbitros):
+    def menu_cadastrar(self, lista_times, lista_arbitros):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -123,10 +97,10 @@ class TelaDePartidas:
                         font=('Candara', 12,'bold'), button_color=button_color)],
                   [sgui.Text('', background_color=background, size=(0,4))]]
         window = sgui.Window('Hora da pelada!', layout, background_color=background, finalize=True, element_padding=(10,10))
-        self.__janela = window
+        self.janela = window
         return
 
-    def menu_criar_partidas_camp(self, lista_campeonatos):
+    def menu_cadastrar_partidas(self, lista_campeonatos):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -146,10 +120,10 @@ class TelaDePartidas:
                   [sgui.Submit('Confirmar', size=(10,2), font=('Candara', 12,'bold'), button_color=button_color), sgui.Cancel('Voltar', size=(10,2), font=('Candara', 12,'bold'), button_color=button_color)],
                   [sgui.Text('', background_color=background, size=(0,4))]]
         window = sgui.Window('Quem ganhar não paga o churrasco!', layout, background_color=background, finalize=True, element_padding=(10,10))
-        self.__janela = window
+        self.janela = window
         return
 
-    def popup_confirmacao_partida(self, str_partida):
+    def popup_confirmar_cadastro(self, str_partida):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -162,7 +136,7 @@ class TelaDePartidas:
         window.Close()
         return botao
 
-    def popup_confirmacao_partidas(self, len_lista_times, nome_campeonato):
+    def popup_confirmar_partidas(self, len_lista_times, nome_campeonato):
         if nome_campeonato == '':
             nome_camp = '?'
         else:
@@ -179,12 +153,12 @@ class TelaDePartidas:
         window.Close()
         return botao
 
-    def popup_msg_erro_partida(self):
+    def popup_msg_erro_cadastro(self):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
         layout = [[sgui.Text('A partida deve ser composta por dois times diferentes e um árbitro.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Text('Escolha novamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
+                  [sgui.Text('Tente novamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
                   [sgui.Button('OK', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color, pad=(0,20))]]
         window = sgui.Window('Cartão Amarelo!'.upper(), layout, titlebar_font=('Candara', 14, 'bold'), background_color='#F3EE44', element_justification='Center', force_toplevel=True, keep_on_top=True)
         botao, valores = window.Read()
@@ -234,18 +208,14 @@ class TelaDePartidas:
                         size=(10,2), font=('Candara', 12,'bold'), button_color=button_color)],
                   [sgui.Text('', background_color=background, size=(0,4))]]
         window = sgui.Window('Jogar partidas', layout, background_color=background, finalize=True, element_padding=(10,10))
-        self.__janela = window
+        self.janela = window
         return
 
     def popup_jogar_camp(self, len_lista_partidas, nome_campeonato):
-        if nome_campeonato == '':
-            nome_camp = '?'
-        else:
-            nome_camp = f' referentes ao campeonato {nome_campeonato}?'
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text(f'Jogar {len_lista_partidas} partidas{nome_camp}', size=(30,2), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
+        layout = [[sgui.Text(f'Jogar campeonato?', size=(30,2), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
                         border_width=(10), font=('Candara', 14, 'bold'), justification='c')],
                   [sgui.Button('Confirmar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color), 
                         sgui.Button('Cancelar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color)]]
@@ -254,7 +224,7 @@ class TelaDePartidas:
         window.Close()
         return botao
 
-    def mostrar_partidas_campeonato(self, lista_str_partidas):
+    def menu_listar(self, lista_str_partidas):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -279,10 +249,10 @@ class TelaDePartidas:
         layer.append(frame_todos_resultados)
         layout = [[sgui.Column(layer, scrollable=True, vertical_scroll_only=True, background_color=background, element_justification='center', size=(950,600))]]
         window = sgui.Window('teste', layout, background_color=background, finalize=True)
-        self.__janela = window
-        return self.__janela
+        self.janela = window
+        return
 
-    def menu_mostrar_partidas(self, lista_campeonatos):
+    def menu_buscar(self, lista_campeonatos):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -300,32 +270,5 @@ class TelaDePartidas:
                         size=(10,2), font=('Candara', 12,'bold'), button_color=button_color)],
                   [sgui.Text('', background_color=background, size=(0,4))]]
         window = sgui.Window('Jogar partidas', layout, background_color=background, finalize=True, element_padding=(10,10))
-        self.__janela = window
+        self.janela = window
         return
-
-
-    def selecionar_entradas(self, tupla: tuple):
-            if isinstance(tupla, tuple):
-                entrada1 = self.strip_str(tupla[0])
-                entrada2 = self.strip_str(tupla[1])
-                if entrada1 == entrada2:
-                    if entrada1 != '':
-                        return entrada1
-                else:
-                    if entrada1 != '':
-                        return entrada1
-                    else:
-                        return entrada2
-            else:
-                return
-
-
-    def strip_str(self, resposta):
-        aux = ''
-        resposta = resposta.split()
-        for n in resposta:
-            aux += n + ' '
-        resposta = aux.strip().title()
-        return resposta
-
- 

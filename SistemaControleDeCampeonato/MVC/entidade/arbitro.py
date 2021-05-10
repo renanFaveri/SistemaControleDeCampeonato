@@ -2,7 +2,7 @@ from .pessoa import Pessoa
 from .rigidez import Rigidez
 
 class Arbitro(Pessoa):
-    
+
     def __init__(self, nome, rigidez: Rigidez, funcao = 'Árbitro'):
         super().__init__(nome, funcao)
         if isinstance(rigidez, Rigidez):

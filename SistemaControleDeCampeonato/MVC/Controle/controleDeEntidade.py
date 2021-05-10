@@ -1,15 +1,20 @@
 from abc import ABC, abstractmethod
 
 class ControladorDeEntidade(ABC):
-    
+
     @abstractmethod
-    def __init__(self):
+    def __init__(self, controlador_master):
         self.__tela = None
+        self.__controlador = controlador_master
     
     @property
     @abstractmethod
     def tela(self):
-        pass     
+        pass
+
+    @property
+    def cm(self):
+        return self.__controlador
 
     @tela.setter
     @abstractmethod

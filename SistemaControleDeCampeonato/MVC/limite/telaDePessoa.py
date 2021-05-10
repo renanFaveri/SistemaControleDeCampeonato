@@ -1,35 +1,12 @@
 import PySimpleGUI as sgui
+from .tela import Tela
 
-class TelaDePessoas:
-    
+
+class TelaDePessoa(Tela):
+
     def __init__(self, controlador):
-        self.__controlador: controlador
-        self.__janela = None
-
-    @property
-    def janela(self):
-        return self.__janela
-
-    @janela.setter
-    def janela(self, janela):
-        if isinstance(janela, sgui.Window):
-            self.__janela = janela
-        else:
-            raise TypeError
-
-    @property
-    def ctrl(self):
-        return self.__controlador
-
-
-    def abreTela(self):
-        return self.__janela.Read()
-
-
-    def fechaTela(self):
-        return self.__janela.Close()
-
-
+        super().__init__(controlador)
+    
     def exibir_menu(self):
         background = '#20660C'
         button_color=('#F3EE44', '#06470F')
@@ -42,10 +19,10 @@ class TelaDePessoas:
                   [sgui.Button('Confirmar', size=(15,2), font=('Candara', 14), button_color=button_color, pad=((10,10), (30,60))),
                         sgui.Button('Voltar', size=(15, 2), font=('Candara', 14), button_color=button_color, pad=((10,10), (30,60)))]]
         window = sgui.Window('UFSC Programmers League', layout, background_color=background, element_justification='Center', finalize=True, keep_on_top = True)
-        self.__janela = window
+        self.janela = window
         return
 
-    def tela_cadastrar_pessoas(self, pessoas_dict_dados):
+    def menu_cadastrar(self, pessoas_dict_dados):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -68,14 +45,13 @@ class TelaDePessoas:
                                 layout=[[sgui.Radio('Informe o nome do árbitro:', 'r1', text_color='white',background_color='#06470F', size=(25,10), font=('Candara', 14), key='arbitro'), 
                                 sgui.InputText(size=(35,1), font=(16), pad=((25,20),0), key=('arbitro_nome')),
                                 sgui.Combo(pessoas_dict_dados['rigidez'], default_value='Escolha a rigidez do árbitro', font=(12), size=(30,1), readonly=True, key='rigidez')]])]])],
-
                   [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))),
                         sgui.Button('Voltar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30)))]]
         window = sgui.Window('', layout, background_color=background, element_justification='left', finalize=True, keep_on_top = True)
-        self.__janela = window
+        self.janela = window
         return
 
-    def menu_buscar_pessoas(self, lista_jogadores, lista_tenicos, lista_arbitros):
+    def menu_buscar(self, lista_jogadores, lista_tenicos, lista_arbitros):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
@@ -98,11 +74,10 @@ class TelaDePessoas:
                                 layout=[[sgui.Radio('Informe o nome do árbitro:', 'r1', text_color='white',background_color='#06470F', size=(25,10), font=('Candara', 14), key='arbitro'), 
                                 sgui.InputText(size=(35,1), font=(16), pad=((25,20),0), key=('in_anome')),
                                 sgui.Combo(sorted(lista_arbitros), default_value='Escolha um árbitro da lista', font=(12), size=(30,1), readonly=True, key='lst_anome')]])]])],
-
                   [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))),
                         sgui.Button('Voltar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30)))]]
         window = sgui.Window('', layout, background_color=background, element_justification='left', finalize=True, keep_on_top = True)
-        self.__janela = window
+        self.janela = window
         return
 
     def janela_jogador(self, jogador_dict_dados, lista_posicoes):
@@ -133,13 +108,17 @@ Gols concedidos:\t\t\t{jogador_dict_dados['gols_c']}"""
                                 sgui.Combo(lista_posicoes, default_value=jogador_dict_dados['posicao'], font=(16), pad=((25,20),0), size=(40,1), readonly=True, key='posicao')]])]],
                         title_color='#FAE98E', background_color='#06470F')]
         estatisticas = [sgui.Multiline(stats, text_color='white', font=(14), background_color=background, size=(50,11), no_scrollbar=True, disabled=True)]
-        frame_estatisticas = [sgui.Frame('Estatísticas', layout = [estatisticas], title_color='#FAE98E', background_color='#06470F')]
+        frame_estatisticas = [sgui.Frame('Estatísticas', layout = [estatisticas], pad=(60,20), title_color='#FAE98E', background_color='#06470F')]
         frame_cadastro = [sgui.Frame('', layout = [nome, posicao], background_color=background)]
         frame_dados = [sgui.Frame('', layout = [frame_estatisticas], background_color='#06470F')]
         botao_excluir = [sgui.Button('Aposentar-se', size=(14,2), font=('Candara', 14), pad=(0,30), border_width=2, focus=True, button_color=('white', 'dark red'), key='excluir')]
-        layout = header +  [frame_cadastro] + [frame_dados] + [botao_excluir]
+
+        coluna = [sgui.Column(layout = [frame_cadastro] + [frame_dados] + [botao_excluir], element_justification='center', background_color=background, 
+                scrollable=True, vertical_scroll_only=True)]
+
+        layout = header +  [coluna]
         window = sgui.Window('Cadastro de time', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def janela_tecnico(self, tecnico_dict_dados, lista_mentalidades):
@@ -164,19 +143,19 @@ Gols concedidos:\t\t\t{jogador_dict_dados['gols_c']}"""
                                 layout=[[sgui.Text('Mentalidade:', size=(50,0), background_color='#06470F', font=('Candara', 12,'bold')), 
                                 sgui.Combo(lista_mentalidades, default_value=tecnico_dict_dados['mentalidade'], font=(16), size=(40,1), readonly=True, key='mentalidade')]])]],
                         title_color='#FAE98E', background_color='#06470F')]   
-
         frame_cadastro = [sgui.Frame('', layout = [nome, mentalidade], background_color=background)] 
         botao_excluir = [sgui.Button('Aposentar-se', size=(14,2), font=('Candara', 14), pad=(0,30), border_width=2, focus=True, button_color=('white', 'dark red'), key='excluir')]
-        layout = header +  [frame_cadastro] + [botao_excluir]
+        coluna = [sgui.Column(layout = [frame_cadastro] + [botao_excluir], element_justification='center', background_color=background, 
+                scrollable=True, vertical_scroll_only=True)]
+        layout = header +  [coluna]
         window = sgui.Window('Cadastro de time', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
 
     def janela_arbitro(self, arbitro_dict_dados, lista_rigidez):
         background = '#20660C'
         text = '#FAE98E'
         button_color=('#F3EE44', '#06470F')
-
         header = [[sgui.Column(layout=[[sgui.Text(arbitro_dict_dados['nome'].upper(), text_color=text, background_color=background, 
                         font=('Candara', 25, 'bold'), size=(50,1), justification='center')],
                         [sgui.Button('Confirmar', size=(15,2), font=('Candara', 12, 'bold'), button_color=button_color, pad=((15,15), (30,30))), 
@@ -193,110 +172,11 @@ Gols concedidos:\t\t\t{jogador_dict_dados['gols_c']}"""
                                 layout=[[sgui.Text('Rigidez:', size=(50,0), background_color='#06470F', font=('Candara', 12,'bold')), 
                                 sgui.Combo(lista_rigidez, default_value=arbitro_dict_dados['rigidez'], font=(16), size=(40,1), readonly=True, key='rigidez')]])]], 
                         title_color='#FAE98E', background_color='#06470F')]
-
         frame_cadastro = [sgui.Frame('', layout = [nome, rigidez], background_color=background)]
         botao_excluir = [sgui.Button('Aposentar-se', size=(14,2), font=('Candara', 14), pad=(0,30), border_width=2, focus=True, button_color=('white', 'dark red'), key='excluir')]
-        layout = header +  [frame_cadastro] + [botao_excluir]
+        coluna = [sgui.Column(layout = [frame_cadastro] + [botao_excluir], element_justification='center', background_color=background, 
+                scrollable=True, vertical_scroll_only=True)]
+        layout = header +  [coluna]
         window = sgui.Window('Cadastro de time', layout, background_color=background, finalize=True, element_padding=(10,10), element_justification='center')
-        self.__janela = window
+        self.janela = window
         return
-
-    def popup_msg_erro_cadastro(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text('Preencha os campos corretamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Text('Escolha novamente.', text_color='#20660C', background_color='#F3EE44', font=('Candara', 16, 'bold'))],
-                  [sgui.Button('OK', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color, pad=(0,20))]]
-        window = sgui.Window('Cartão Amarelo!'.upper(), layout, titlebar_font=('Candara', 14, 'bold'), background_color='#F3EE44', element_justification='Center', force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return
-
-    def popup_confirmar_cadastro(self, dados):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text(f'Confirmar a criação do seguinte cadastro: {dados[1]} {dados[2]} {dados[0]}?', size=(0,1), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
-                        border_width=(10), font=('Candara', 14, 'bold'), justification='c')],
-                  [sgui.Button('Confirmar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color), 
-                        sgui.Button('Cancelar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color)]]
-        window = sgui.Window('Confirmar cadastro', layout, background_color=background, element_justification='Center', element_padding=(10,10), force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return botao
-
-    def popup_cadastro_criado(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text('Cadastro criado!', size=(40,1), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
-                        border_width=(10), font=('Candara', 14, 'bold'), justification='c')]]
-        window = sgui.Window('ok', layout, background_color=background, element_justification='Center', element_padding=(10,10), force_toplevel=True, 
-                keep_on_top=True, auto_close=True, auto_close_duration=1)
-        botao, valores = window.Read()
-        window.Close()
-        return botao
-
-    def popup_confirmar_alteracao(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text(f'Foram feitas alterações no cadastro.\n Confirmar essas alterações?', size=(35,3), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
-                        border_width=(10), font=('Candara', 14, 'bold'), justification='c')],
-                  [sgui.Button('Confirmar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color), 
-                        sgui.Button('Cancelar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=button_color)]]
-        window = sgui.Window('Confirmar alterações', layout, background_color=background, element_justification='Center', element_padding=(10,10), force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return botao
-
-
-    def popup_msg_excluir(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text('Você tem certeza que deseja excluir esse cadastro?', text_color='white', background_color='#ce221e', font=('Candara', 16, 'bold'))],
-                  [sgui.Text('A exclusão será irreversível!', text_color='white', background_color='#ce221e', font=('Candara', 16, 'bold'))],
-                  [sgui.Button('Confirmar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=('white', 'black'), pad=(10,20)),
-                    sgui.Button('Cancelar', size=(10,2), font=('Candara', 12,'bold'), border_width=2, focus=True, button_color=('white', 'black'), pad=(10,20))]] 
-        window = sgui.Window('Cartão Vermelho!'.upper(), layout, titlebar_font=('Candara', 14, 'bold'), background_color='#ce221e', element_justification='Center', force_toplevel=True, keep_on_top=True)
-        botao, valores = window.Read()
-        window.Close()
-        return botao
-
-    def popup_cadastro_excluido(self):
-        background = '#20660C'
-        text = '#FAE98E'
-        button_color=('#F3EE44', '#06470F')
-        layout = [[sgui.Text('Cadastro excluído!', size=(40,1), pad=((20,20)), text_color='#F3EE44', background_color='#06470F', 
-                        border_width=(10), font=('Candara', 14, 'bold'), justification='c')]]
-        window = sgui.Window('ok', layout, background_color=background, element_justification='Center', element_padding=(10,10), force_toplevel=True, 
-                keep_on_top=True, auto_close=True, auto_close_duration=1)
-        botao, valores = window.Read()
-        window.Close()
-        return botao
-
-
-    def selecionar_entradas(self, tupla: tuple):
-            if isinstance(tupla, tuple):
-                entrada1 = self.strip_str(tupla[0])
-                entrada2 = self.strip_str(tupla[1])
-                if entrada1 == entrada2:
-                    if entrada1 != '':
-                        return entrada1
-                else:
-                    if entrada1 != '':
-                        return entrada1
-                    else:
-                        return entrada2
-            else:
-                return
-
-    def strip_str(self, resposta):
-        aux = ''
-        resposta = resposta.split()
-        for n in resposta:
-            aux += n + ' '
-        resposta = aux.strip().title()
-        return resposta
